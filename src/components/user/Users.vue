@@ -66,9 +66,9 @@ export default {
             queryInfo: {
                 query: '',
                 // 当前的页数
-                pagenum: '5',
+                pagenum: 5,
                 // 当前每页显示多少数据
-                pagesize: '1'
+                pagesize: 1
             },
             total: 200,
             userList: [{ "id":1,"username":"aaaa","mobile":"123445","type":1,"email":"adf@qq.com","create_time":"2018-08-09","mg_state":true,"role_name":"管理员"},
@@ -86,18 +86,18 @@ export default {
     methods: {
         getUserList() {
             this.$http.get('users',{params:{}})
+        },
+        //监听pagesize改变事件
+        handleSizeChange(newSize) {
+            console.log(newSize)
+            this.queryInfo.pagesize = newSize
+        },
+        //监听页码值改变
+        handleCurrentChange(newPage) {
+            this.queryInfo.pagenum = newPage
         }
-
-    },
-    //监听pagesize改变事件
-    handleSizeChange(newSize) {
-        console.log(newSize)
-        this.queryInfo.pagesize = newSize
-    },
-    //监听页码值改变
-    handleCurrentChange(newPage) {
-        this.queryInfo.pagenum = newPage
     }
+    
 }
 </script>
 
