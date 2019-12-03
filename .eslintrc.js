@@ -26,7 +26,20 @@ module.exports = {
     "no-multiple-empty-lines": [0, {"max": 100}],
     //关闭禁止混用tab和空格
     "no-mixed-spaces-and-tabs": [0],
-    "indent": 0
+    "indent": 0,
+    "no-unused-vars": 0,
+    "quotes": [1, "single"], //使用单引号，提示是警告
+    "quotes": [0, "double"], //使用双引号，关闭
+    "space-before-function-paren": 0,
+    "object-curly-spacing": 0,
+    "keyword-spacing": 0,
+    "no-trailing-spaces": 0,
+    "key-spacing": 0,
+    "comma-spacing": 0,
+    "spaced-comment": 0,
+    "eol-last": 0,
+    "standard/object-curly-even-spacing": 0,
+    "vue/no-unused-vars": 0
   },
   parserOptions: {
     parser: 'babel-eslint'

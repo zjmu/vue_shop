@@ -3,8 +3,22 @@ import { Button, Form, FormItem, Input, Message,
 Container,
 Header,
 Aside,
-Main
+Main,
+Menu,
+Submenu,
+MenuItem,
+Breadcrumb,
+BreadcrumbItem,
+Card,
+Row,
+Col,
+Table,
+TableColumn,
+Switch,
+Tooltip,
+Pagination
 } from 'element-ui'
+import router from '../router';
 Vue.use(Button)
 Vue.use(Form)
 Vue.use(FormItem)
@@ -14,3 +28,16 @@ Vue.use(Header)
 Vue.use(Aside)
 Vue.use(Main)
 Vue.prototype.$message = Message
+Vue.use(Menu)
+Vue.use(Submenu)
+Vue.use(MenuItem)
+Vue.use(Breadcrumb)
+Vue.use(BreadcrumbItem)
+Vue.use(Card)
+Vue.use(Row)
+Vue.use(Col)
+Vue.use(Table)
+Vue.use(TableColumn)
+Vue.use(Switch)
+Vue.use(Tooltip)
+Vue.use(Pagination)

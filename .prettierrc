@@ -1,5 +1,6 @@
 {
     "semi": false,
     "singleQuota": true,
-    "indent": false
+    "indent": false,
+    "quotes": false
 }
