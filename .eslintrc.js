@@ -39,7 +39,8 @@ module.exports = {
     "spaced-comment": 0,
     "eol-last": 0,
     "standard/object-curly-even-spacing": 0,
-    "vue/no-unused-vars": 0
+    "vue/no-unused-vars": 0,
+    "no-useless-return": 0
   },
   parserOptions: {
     parser: 'babel-eslint'

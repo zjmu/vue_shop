@@ -70,18 +70,18 @@ export default {
       // console.log(this)
       this.$refs.loginFormRef.resetFields()
     },
-    login () {
-      this.$refs.loginFormRef.validate(async valid => {
-        if (!valid) return
-        const { data: res } = await this.$http.post('/api/login', this.loginForm)
-        if (res.meta.status !== 200) return this.$message.error('登录失败！')
-        this.$message.success('登录成功！')
-        window.sessionStorage.setItem('token', res.data.token)
+    create() {
+      this.login()
+    },
+    login() {
+      this.$ajax({
+        url: 'http://localhost:8091/contents/?access_token=c7829e2e-b6e8-424c-ac15-735fbe78eaac',
+        method:'get'
+      }).then(res => {
+        console.log(res)
       })
-      // this.$http.post('/api/login', this.loginForm).then(res => {
-      //   console.log(res)
-      // })
     }
+    
   }
 }
 </script>
