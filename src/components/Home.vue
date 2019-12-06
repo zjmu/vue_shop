@@ -47,9 +47,9 @@
 export default {
     data() {
         return {
-            menulist: [{id: 1, authName:"一级菜单", child:[{id:1,name:'一级子一',path:'userList'},{id:2,name:'一级子二',path:'userList'}]},
-                       {id: 2, authName:"二级菜单", child:[{id:3,name:'一级子一',path:'userList'},{id:4,name:'一级子二',path:'userList2'}]},
-                       {id: 3, authName:"三级菜单", child:[{id:5,name:'一级子一',path:'userList'},{id:6,name:'一级子二',path:'userList'}]},
+            menulist: [{id: 1, authName:"用户列表", child:[{id:1,name:'一级子一',path:'userList'},{id:2,name:'一级子二',path:'right'}]},
+                       {id: 2, authName:"权限列表", child:[{id:3,name:'一级子一',path:'right'},{id:4,name:'一级子二',path:'aaa'}]},
+                       {id: 3, authName:"管理员列表", child:[{id:5,name:'一级子一',path:'manager'},{id:6,name:'一级子二',path:'aaavvvv'}]},
                        {id: 4, authName:"四级菜单"},
                        {id: 5, authName:"五级菜单"}],
             

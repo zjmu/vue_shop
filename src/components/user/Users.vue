@@ -47,7 +47,7 @@
                 <el-table-column label="操作" width="180px">
                     <template slot-scope="scope">
                         <el-button type="primary" icon="el-icon-edit" size="mini" @click="editUser(scope.$index,scope.row)"></el-button>
-                        <el-button type="info" icon="el-icon-delete" size="mini" @click="deletUser(scope.$index,scope.row)"></el-button>
+                        <el-button type="info" icon="el-icon-delete" size="mini" @click="deletUser(scope.row.id)"></el-button>
                         <!-- 提示消息 -->
                         <el-tooltip  effect="dark" content="分配角色" placement="top" :enterable="false">
                             <el-button type="danger" icon="el-icon-setting" size="mini"></el-button>
@@ -255,13 +255,14 @@ export default {
             this.$refs.addFormRef.resetFields()
         },
         editUser(index,row) {
+            //优化：通过id查询用户信息，表单重置
             this.updateForm.username = row.username
             this.updateForm.email = row.email
             this.updateForm.mobile = row.mobile
             this.updateDialogVisible = true
         },
-        deletUser(index,row) {
-            this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        async deletUser(id) {
+          await this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning'
@@ -271,14 +272,13 @@ export default {
                 message: '删除成功!'
             });
             }).catch(() => {
-                this.$message({
-                    type: 'info',
-                    message: '已取消删除'
-                });          
+            this.$message({
+                type: 'info',
+                message: '已取消删除'
+            });          
             });
         }
     }
-    
 }
 </script>
 
