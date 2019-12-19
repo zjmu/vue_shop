@@ -1,18 +1,10 @@
 <template>
-<!-- 1.添加用户对话框
-1.1导入组件
-1.2设置是否显示
-1.3绑定事件 -->
-<!-- 自定义校验规则
-1.data中放变量并赋值一个函数
-2.函数内使用正则，并和value比较，返回校验结果
-3.在rules中使用校验结果 -->
-    <div>
+     <div>
         <!-- 面包屑导航区 -->
         <el-breadcrumb separator-class="el-icon-arrow-right">
             <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
             <el-breadcrumb-item>用户管理</el-breadcrumb-item>
-            <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+            <el-breadcrumb-item>用户黑名单</el-breadcrumb-item>
         </el-breadcrumb>
         
         <!-- 卡片视图 -->
@@ -26,34 +18,22 @@
                 </el-col>
                 <el-col :span="4">
                     <el-button type="primary" @click="addDialogVisible = true">
-                        添加用户
+                        添加黑名单
                     </el-button>
                 </el-col>
             </el-row>
 
             <!-- 用户列表区域 --> 
-            <el-table :data="userList" border stripe height="380"> 
-                <el-table-column type="index"></el-table-column>
-                <el-table-column label="姓名" prop="username"></el-table-column>
-                <el-table-column label="邮箱" prop="emial"></el-table-column>
-                <el-table-column label="电话" prop="phone"></el-table-column>
-                <el-table-column label="角色" prop="role_name"></el-table-column>
-                <el-table-column label="状态" >
-                    <!-- 作用域插槽： slot-scope接收作用域数据.row获取对应行数据 -->
-                    <template slot-scope="scope">
-                        <el-switch v-model="scope.row.state" @change="userStateChanged(scope.row)"></el-switch>
-                    </template>
+            <el-table :data="blackList" border stripe height="380"> 
+                <el-table-column label="选择" type="index">
+                    <el-radio :label="3">备选项</el-radio>
                 </el-table-column>
-                <el-table-column label="操作" width="180px">
-                    <template slot-scope="scope">
-                        <el-button type="primary" icon="el-icon-edit" size="mini" @click="editUser(scope.$index,scope.row)"></el-button>
-                        <el-button type="info" icon="el-icon-delete" size="mini" @click="deletUser(scope.row.id)"></el-button>
-                        <!-- 提示消息 -->
-                        <el-tooltip  effect="dark" content="分配角色" placement="top" :enterable="false">
-                            <el-button type="danger" icon="el-icon-setting" size="mini"></el-button>
-                        </el-tooltip>
-                    </template>
-                </el-table-column>
+                <el-table-column label="手机号" prop="username"></el-table-column>
+                <el-table-column label="姓名" prop="emial"></el-table-column>
+                <el-table-column label="id" prop="phone"></el-table-column>
+                <el-table-column label="惩罚" prop="role_name"></el-table-column>
+                <el-table-column label="操作人" prop="role_name"></el-table-column>
+                <el-table-column label="操作时间" prop="role_name"></el-table-column>
             </el-table>
 
             <!-- 分页 -->
@@ -325,7 +305,7 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
+<style lang = "less" scoped>
 .el-table {
     margin-top: 30px;
     font-size: 12px;

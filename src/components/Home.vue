@@ -47,11 +47,11 @@
 export default {
     data() {
         return {
-            menulist: [{id: 1, authName:"用户列表", child:[{id:1,name:'一级子一',path:'userList'},{id:2,name:'一级子二',path:'right'}]},
-                       {id: 2, authName:"权限列表", child:[{id:3,name:'一级子一',path:'right'},{id:4,name:'一级子二',path:'aaa'}]},
-                       {id: 3, authName:"管理员列表", child:[{id:5,name:'一级子一',path:'manager'},{id:6,name:'一级子二',path:'aaavvvv'}]},
-                       {id: 4, authName:"四级菜单"},
-                       {id: 5, authName:"五级菜单"}],
+            menulist: [{id: 1, authName:"用户管理", child:[{id:1,name:'查看用户信息',path:'userList'},{id:2,name:'用户黑名单',path:'blackList'}]},
+                       {id: 2, authName:"系统设置", child:[{id:3,name:'标题设置',path:'right'},{id:4,name:'违规原因设置',path:'aaa'}]},
+                       {id: 3, authName:"审核文章", child:[{id:5,name:'主题文章',path:'manager'},{id:6,name:'评论文章',path:'aaavvvv'}]},
+                       {id: 4, authName:"统计系统数据", child:[{id:5,name:'主题文章',path:'manager'}]},
+                       {id: 5, authName:"个人信息管理", child:[{id:5,name:'主题文章',path:'manager'}]}],
             
             iconObject: {
                 '1': 'iconfont icon-user',

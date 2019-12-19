@@ -40,7 +40,11 @@ module.exports = {
     "eol-last": 0,
     "standard/object-curly-even-spacing": 0,
     "vue/no-unused-vars": 0,
-    "no-useless-return": 0
+    "no-useless-return": 0,
+    "Unexpected constant condition": 0,
+    "eqeqeq": 0,
+    "no-constant-condition":0,
+    "no-self-compare":0
   },
   parserOptions: {
     parser: 'babel-eslint'

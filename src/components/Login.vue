@@ -49,7 +49,7 @@ export default {
     return {
       //    这是登录表单的数据绑定对象
       loginForm: {
-        username: 'admin',
+        username: 'zjm',
         password: '123456'
       },
       // 表单验证
@@ -74,13 +74,23 @@ export default {
       this.login()
     },
     login() {
-      this.$ajax({
-        url: 'http://localhost:8091/contents/?access_token=c7829e2e-b6e8-424c-ac15-735fbe78eaac',
-        method:'get'
+      this.$axios({
+          method: 'post',
+          url: 'http://localhost:8080/login',
+          data: this.loginForm,
+          headers: {
+            'Content-Type': 'application/json'
+          }
       }).then(res => {
         console.log(res)
-      })
-    }
+        console.log(res.data.code)
+        var code = res.data.code;
+        if(code == 0) {
+          sessionStorage.setItem('token', res.data.data)
+          this.$router.push({path:'/home'})
+        }
+      });
+      }
     
   }
 }
