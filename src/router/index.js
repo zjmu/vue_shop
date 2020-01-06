@@ -5,19 +5,21 @@ import Home from '../components/Home.vue'
 import Welcome from '../components/Welcome.vue'
 import Users from '../components/user/Users.vue'
 import BlackList from '../components/blackList/blackList.vue'
+import Label from '../components/label/Label'
 
 Vue.use(VueRouter)
 
 const routes = [
   { path: '/login', component: Login },
   { path: '/', redirect: '/login' },
-  { 
-    path: '/home', 
-    component: Home, 
+  {
+    path: '/home',
+    component: Home,
     redirect: '/welcome',
     children: [{path: '/welcome', component: Welcome},
                {path: '/userList', component:Users},
-               {path: '/blackList', component:BlackList}] 
+               {path: '/blackList', component:BlackList},
+               {path: '/label', component:Label}]
   }
 ]
 

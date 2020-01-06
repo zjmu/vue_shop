@@ -24,7 +24,7 @@
                     <span>{{item.authName}}</span>
                 </template>
                 <!-- 二级菜单 -->
-                <el-menu-item :index="'/'+subItem.path" v-for="subItem in item.child" 
+                <el-menu-item :index="'/'+subItem.path" v-for="subItem in item.child"
                 :key="subItem.id" @click="saveNavState('/'+subItem.path)">
                     <template slot="title">
                     <i class="el-icon-menu"></i>
@@ -48,11 +48,11 @@ export default {
     data() {
         return {
             menulist: [{id: 1, authName:"用户管理", child:[{id:1,name:'查看用户信息',path:'userList'},{id:2,name:'用户黑名单',path:'blackList'}]},
-                       {id: 2, authName:"系统设置", child:[{id:3,name:'标题设置',path:'right'},{id:4,name:'违规原因设置',path:'aaa'}]},
-                       {id: 3, authName:"审核文章", child:[{id:5,name:'主题文章',path:'manager'},{id:6,name:'评论文章',path:'aaavvvv'}]},
+                       {id: 2, authName:"系统设置", child:[{id:3,name:'标题设置',path:'label'},{id:4,name:'违规原因设置',path:'violation'}]},
+                       {id: 3, authName:"审核文章", child:[{id:5,name:'主题文章',path:'article'},{id:6,name:'评论文章',path:'comment'}]},
                        {id: 4, authName:"统计系统数据", child:[{id:5,name:'主题文章',path:'manager'}]},
-                       {id: 5, authName:"个人信息管理", child:[{id:5,name:'主题文章',path:'manager'}]}],
-            
+                       {id: 5, authName:"个人信息管理", child:[{id:5,name:'个人信息',path:'manager'}]}],
+
             iconObject: {
                 '1': 'iconfont icon-user',
                 '2': 'iconfont icon-baobiao',
@@ -78,7 +78,7 @@ export default {
         // const {data: res} = await this.$http.get('menus')
         // if(res.meta.status !== 200) return this.$message.console.error(res.meta.msg)
         // this.menulist = res.data
-        
+
         // console.log(res)
         },
         //菜单折叠展开
@@ -90,7 +90,7 @@ export default {
             this.activePath = activePath
         }
     }
-    
+
 }
 </script>
 

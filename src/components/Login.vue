@@ -71,7 +71,7 @@ export default {
       this.$refs.loginFormRef.resetFields()
     },
     create() {
-      this.login()
+      sessionStorage.setItem('token', this.loginForm.username)
     },
     login() {
       this.$axios({
