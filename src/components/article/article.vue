@@ -7,78 +7,130 @@
       <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
 
+    <!-- 编号-->
+    <!--        车主昵称-->
+    <!--        标签-->
+    <!--        状态-->
+    <!--        是否精选-->
+    <!--        是否顶置-->
+    <!--        操作人-->
+    <!--        操作日期-->
     <!-- 卡片视图 -->
-    <el-card class="box-card">
-      <!-- 搜索与添加区域 -->
-      <el-row :gutter="20" style="margin-bottom:30px">
-        <el-col :span="1.1">手机号</el-col>
-        <el-col :span="8">
-          <el-input
-            size="small"
-            placeholder="请输入内容"
-            v-model="queryInfo.query"
-            clearable
-            @clear="getUserList"
-          ></el-input>
-        </el-col>
-        <el-col :span="1.1" style="margin-left:40px">惩罚</el-col>
-        <el-col :span="8">
-          <el-select size="small" v-model="value" clearable placeholder="请选择">
-            <el-option
-              v-for="item in option"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
-          </el-select>
-        </el-col>
-      </el-row>
+    <div class="bigBox">
+      <!--      第一行-->
+      <div class="line">
+        <div class="title">编号</div>
+        <el-input
+          size="small"
+          placeholder="请输入内容"
+          v-model="queryInfo.query"
+          clearable
+          @clear="getUserList"
+        ></el-input>
+        <div class="title">昵称</div>
+        <el-input
+          size="small"
+          placeholder="请输入内容"
+          v-model="queryInfo.query"
+          clearable
+          @clear="getUserList"
+        ></el-input>
+        <div class="title">标签</div>
+        <el-select size="small" v-model="value" clearable placeholder="请选择" style="margin-right: 0px">
+          <el-option
+            v-for="item in option"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+      </div>
+      <!--      第二行-->
+      <div class="line">
+        <div class="title">状态</div>
+        <el-select size="small" v-model="value" clearable placeholder="请选择">
+          <el-option
+            v-for="item in option"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+        <div class="title">顶置</div>
+        <el-select size="small" v-model="value" clearable placeholder="请选择">
+          <el-option
+            v-for="item in option"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+        <div class="title">精选</div>
+        <el-select size="small" v-model="value" clearable placeholder="请选择" style="margin-right: 0px">
+          <el-option
+            v-for="item in option"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+      </div>
+      <!--      第三行-->
+      <div class="line">
+        <div class="title">操作人</div>
+        <el-input
+          size="small"
+          placeholder="请输入内容"
+          v-model="queryInfo.query"
+          clearable
+          @clear="getUserList"
+        ></el-input>
+        <div class="time">操作日期</div>
+        <el-date-picker
+          size="small"
+          v-model="value2"
+          type="daterange"
+          align="right"
+          unlink-panels
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :picker-options="pickerOptions"
+        ></el-date-picker>
+      </div>
 
-      <el-row :gutter="20" style="margin-bottom:30px">
-        <el-col :span="1.1">操作人</el-col>
-        <el-col :span="8">
-          <el-input size="small" placeholder="请输入内容" v-model="queryInfo.query" clearable></el-input>
-        </el-col>
-        <el-col :span="1.1" style="margin-left:40px">操作日期</el-col>
-        <el-col :span="8">
-          <div class="block">
-            <el-date-picker
-              size="small"
-              v-model="value2"
-              type="daterange"
-              align="right"
-              unlink-panels
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              :picker-options="pickerOptions"
-            ></el-date-picker>
-          </div>
-        </el-col>
-      </el-row>
-      <el-row justify="center" style="margin-bottom:30px">
-        <el-button type="warning" size="small" style="display:block;margin:0 auto">警告按钮</el-button>
-      </el-row>
+      <div class="line">
+        <el-button type="warning" size="small" style="display:block;margin:0 auto">查询</el-button>
+      </div>
 
-      <el-row justify="center">
+      <div class="button">
         <el-button type="primary" size="small" icon="el-icon-circle-plus-outline">新建</el-button>
-        <el-button
-          type="primary"
-          size="small"
-          icon="el-icon-edit"
-          :disabled="templateSelection>-1?false:true"
-        >修改
+        <el-button type="primary" size="small" icon="el-icon-edit" :disabled="templateSelection>-1?false:true"
+        >编辑
         </el-button>
-        <el-button
-          type="primary"
-          size="small"
-          icon="el-icon-time"
-          :disabled="templateSelection>-1?false:true"
-        >历史记录
+        <el-button type="primary" size="small" icon="el-icon-time" :disabled="templateSelection>-1?false:true"
+        >查看
         </el-button>
-      </el-row>
-      <!-- 用户列表区域 -->
-      <el-table :data="userList" border stripe height="380">
+<!--        删除-->
+        <el-button type="primary" size="small" icon="el-icon-delete" :disabled="templateSelection>-1?false:true"
+        >删除
+        </el-button>
+<!--        顶置-->
+        <el-button type="primary" size="small" icon="el-icon-time" :disabled="templateSelection>-1?false:true"
+        >顶置
+        </el-button>
+<!--        取消顶置-->
+        <el-button type="primary" size="small" icon="el-icon-time" :disabled="templateSelection>-1?false:true"
+        >取消顶置
+        </el-button>
+<!--        发布-->
+        <el-button type="primary" size="small" icon="el-icon-time" :disabled="templateSelection>-1?false:true"
+        >发布
+        </el-button>
+      </div>
+
+      <!--表格区域-->
+      <el-table :data="userList" border stripe height="380" style="margin-left:30px; width:95%; bottom: 20px">
         <el-table-column type width="50px" label="选择">
           <template scope="scope">
             <el-radio
@@ -95,18 +147,20 @@
         <el-table-column label="操作人" prop="phone"></el-table-column>
         <el-table-column label="操作时间" prop="role_name"></el-table-column>
       </el-table>
+    </div>
 
-      <!-- 分页 -->
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="queryInfo.pagenum"
-        :page-sizes="[5, 10, 15, 20, 30]"
-        :page-size="queryInfo.pagesize"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-      ></el-pagination>
-    </el-card>
+
+    <!-- 分页 -->
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="queryInfo.pagenum"
+      :page-sizes="[5, 10, 15, 20, 30]"
+      :page-size="queryInfo.pagesize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total"
+    ></el-pagination>
+    <!--    </el-card>-->
 
     <!-- 添加用户对话框 -->
     <el-dialog title="添加用户" :visible.sync="addDialogVisible" width="50%" @close="addDialogClosed">
@@ -372,8 +426,50 @@
     width: 50%;
   }
 
-  .input {
+  .el-input--small {
     float: left;
-    width: 20%;
+    width: 200px;
+    margin-right: 100px;
+    margin-left: 5px;
+  }
+
+  .line {
+    margin-top: 13px;
+    float: left;
+    width: 1100px;
+    margin-bottom: 12px;
+  }
+
+  .title {
+    float: left;
+    margin-left: 40px;
+    padding: 0px;
+  }
+
+  .el-pagination {
+    float: left;
+  }
+
+  .bigBox {
+    background: white;
+    float: left;
+  }
+
+  .el-select {
+    float: left;
+    width: 200px;
+    margin-right: 100px;
+    margin-left: 5px;
+  }
+
+  .time {
+    float: left;
+    margin-left: 24px;
+    padding: 0px;
+    margin-right: 4px;
+  }
+
+  .button {
+    margin-left: 30px;
   }
 </style>

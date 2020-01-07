@@ -6,6 +6,11 @@ import Welcome from '../components/Welcome.vue'
 import Users from '../components/user/Users.vue'
 import BlackList from '../components/blackList/blackList.vue'
 import Label from '../components/label/Label'
+import Reason from '../components/reason/reason'
+import Article from '../components/article/article'
+import ReviewArticle from '../components/reviewArticle/reviewArticle'
+import ReviewComment from '../components/reviewComment/reviewComment'
+
 
 Vue.use(VueRouter)
 
@@ -19,7 +24,12 @@ const routes = [
     children: [{path: '/welcome', component: Welcome},
                {path: '/userList', component:Users},
                {path: '/blackList', component:BlackList},
-               {path: '/label', component:Label}]
+               {path: '/label', component:Label},
+               {path: '/reason', component:Reason},
+               {path: '/article', component:Article},
+               {path: '/reviewArticle', component:ReviewArticle},
+               {path: '/reviewComment', component:ReviewComment}
+               ]
   }
 ]
 

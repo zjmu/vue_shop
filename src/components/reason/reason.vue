@@ -10,7 +10,7 @@
     <!-- 卡片视图 -->
     <el-card class="box-card">
 
-<!--      选择标签类型-->
+      <!--      选择标签类型-->
       <el-select v-model="value" placeholder="请选择" class="select">
         <el-option
           v-for="item in options"
@@ -23,11 +23,11 @@
       <el-row justify="center">
         <el-button type="primary" size="small" icon="el-icon-circle-plus-outline" @click="addDialogVisible = true">新建</el-button>
         <el-button type="primary" size="small" icon="el-icon-edit" :disabled="templateSelection>-1?false:true" @click="updateDialogVisible = true">修改</el-button>
-        <el-button type="danger" size="small" icon="el-icon-delete" :disabled="templateSelection>-1?false:true" @click="deleteLabel">删除</el-button>
+        <el-button type="danger" size="small" icon="el-icon-delete" :disabled="templateSelection>-1?false:true" @click="deleteReason">修改</el-button>
       </el-row>
 
       <!-- 标签列表区域 -->
-      <el-table :data="labelList" border stripe height="380">
+      <el-table :data="reasonList" border stripe height="380">
         <el-table-column type width="50px" label="选择">
           <template scope="scope">
             <el-radio
@@ -39,10 +39,10 @@
             </el-radio>
           </template>
         </el-table-column>
-        <el-table-column label="标签" prop="label"></el-table-column>
+        <el-table-column label="违规原因" prop="reason"></el-table-column>
         <el-table-column label="编号" prop="code"></el-table-column>
         <el-table-column label="操作人" prop="operator"></el-table-column>
-        <el-table-column label="重要程度" prop="weight"></el-table-column>
+        <el-table-column label="权值" prop="weight"></el-table-column>
         <el-table-column label="操作时间" prop="opTime"></el-table-column>
       </el-table>
 
@@ -59,13 +59,13 @@
     </el-card>
 
     <!-- 添加标签对话框 -->
-    <el-dialog title="添加用户" :visible.sync="addDialogVisible"
+    <el-dialog title="添加违规规则" :visible.sync="addDialogVisible"
                width="50%" @close="addDialogClosed">
 
       <!-- 内容主体区域 -->
       <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px" >
-        <el-form-item label="标签" prop="label">
-          <el-input v-model="addForm.label"></el-input>
+        <el-form-item label="规则" prop="reason">
+          <el-input v-model="addForm.reason"></el-input>
         </el-form-item>
         <el-form-item label="权重" prop="weight">
           <el-input v-model="addForm.weight"></el-input>
@@ -75,7 +75,7 @@
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
             <el-button @click="addDialogVisible = false">取 消</el-button>
-            <el-button type="primary" @click="addLabel">确 定</el-button>
+            <el-button type="primary" @click="addReason">确 定</el-button>
         </span>
     </el-dialog>
 
@@ -84,7 +84,7 @@
       <!-- 内容主体区域 -->
       <el-form :model="updateForm" :rules="addFormRules" ref="updateFormRef" label-width="70px">
         <el-form-item label="标签名" prop="label">
-          <el-input v-model="updateForm.label"></el-input>
+          <el-input v-model="updateForm.reason"></el-input>
         </el-form-item>
         <el-form-item label="编号" prop="code">
           <el-input v-model="updateForm.code"></el-input>
@@ -97,7 +97,7 @@
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
         <el-button @click="updateDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="updateLabel">确 定</el-button>
+        <el-button type="primary" @click="updateReason">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -147,21 +147,21 @@
           pagesize: 10
         },
         total: 200,
-        labelForm: {
-          label: "",
+        reasonForm: {
+          reason: "",
           code: "",
           operator: "",
           weight:"",
           opTime: ""
         },
-        labelList:[],
+        reasonList:[],
         addForm: {
-          label:"",
+          reason:"",
           weight:""
         },
         addFormRules: {
-          label: [
-            { required: true, message:'请输入标签名',trigger:'blur' },
+          reason: [
+            { required: true, message:'请输入违规名',trigger:'blur' },
             {min:1, max:10, message: '标签名长度为1-10', trigger:'blur'}
           ],
           weight: [
@@ -170,7 +170,7 @@
           ]
         },
         updateForm: {
-          label:"",
+          reason:"",
           code:"",
           weight:""
         },
@@ -181,11 +181,12 @@
     },
     methods: {
       //更新标签
-      updateLabel() {
+      updateReason() {
         console.log(this.templateSelection)
+        this.addDialogClosed()
       },
       //删除标签
-      deleteLabel() {
+      deleteReason() {
         console.log(this.templateSelection)
       },
       //将行id赋值
@@ -241,7 +242,7 @@
         this.$refs.addFormRef.resetFields()
       },
       //添加标签
-      addLabel() {
+      addReason() {
         this.addDialogVisible = false
         this.$refs.addFormRef.validate(valid => {
           if(!valid) return
@@ -253,7 +254,7 @@
 </script>
 
 <style scoped>
-.el-select {
-  margin-bottom: 30px;
-}
+  .el-select {
+    margin-bottom: 30px;
+  }
 </style>
