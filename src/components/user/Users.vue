@@ -34,10 +34,15 @@
       <!-- 用户列表区域 -->
       <el-table :data="userList" border stripe height="380">
         <el-table-column type="index"></el-table-column>
-        <el-table-column label="姓名" prop="username"></el-table-column>
-        <el-table-column label="邮箱" prop="emial"></el-table-column>
+        <el-table-column label="姓名" prop="name"></el-table-column>
+        <el-table-column label="签名" prop="signature"></el-table-column>
+        <el-table-column label="邮箱" prop="email"></el-table-column>
         <el-table-column label="电话" prop="phone"></el-table-column>
-        <el-table-column label="角色" prop="role_name"></el-table-column>
+        <el-table-column label="年龄" prop="age"></el-table-column>
+        <el-table-column label="昵称" prop="nickname"></el-table-column>
+        <el-table-column label="创建时间" prop="createTime"></el-table-column>
+        <el-table-column label="信用度" prop="credibility"></el-table-column>
+        <el-table-column label="用户类型" prop="userType"></el-table-column>
         <el-table-column label="状态">
           <!-- 作用域插槽： slot-scope接收作用域数据.row获取对应行数据 -->
           <template slot-scope="scope">
@@ -77,11 +82,36 @@
         <el-form-item label="密码" prop="password">
           <el-input v-model="addForm.password"></el-input>
         </el-form-item>
+        <el-form-item label="名字" prop="name">
+          <el-input v-model="addForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="头像" prop="icon">
+          <el-input v-model="addForm.icon"></el-input>
+        </el-form-item>
+        <el-form-item label="签名" prop="signature">
+          <el-input v-model="addForm.signature"></el-input>
+        </el-form-item>
+        <el-form-item label="昵称" prop="nickname">
+          <el-input v-model="addForm.nickname"></el-input>
+        </el-form-item>
+        <el-form-item label="年龄" prop="age">
+          <el-input v-model="addForm.age"></el-input>
+        </el-form-item>
+        <el-form-item label="性别" prop="sex">
+          <el-select v-model="addForm.sex" clearable placeholder="请选择用户类型">
+            <el-option
+              v-for="item in sexType"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            ></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="addForm.email"></el-input>
         </el-form-item>
-        <el-form-item label="手机号" prop="mobile">
-          <el-input v-model="addForm.mobile"></el-input>
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model="addForm.phone"></el-input>
         </el-form-item>
       </el-form>
 
@@ -98,14 +128,27 @@
 
       <!-- 内容主体区域 -->
       <el-form :model="updateForm" :rules="addFormRules" ref="updateFormRef" label-width="70px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="updateForm.username"></el-input>
+        <el-form-item label="用户名" prop="name">
+          <el-input v-model="updateForm.name"></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="updateForm.email"></el-input>
         </el-form-item>
         <el-form-item label="手机号" prop="mobile">
-          <el-input v-model="updateForm.mobile"></el-input>
+          <el-input v-model="updateForm.phone"></el-input>
+        </el-form-item>
+        <el-form-item label="信用度" prop="credibility">
+          <el-input v-model="updateForm.credibility"></el-input>
+        </el-form-item>
+        <el-form-item label="用户类型" prop="userType">
+            <el-select size="small" v-model="updateForm.userType" clearable placeholder="请选择用户类型">
+              <el-option
+                v-for="item in userType"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
         </el-form-item>
       </el-form>
 
@@ -121,6 +164,40 @@
 <script>
   export default {
     data() {
+      //验证信用度
+      var checkDigit = (rule, value, callback) => {
+        console.log(value)
+        console.log(Number.isInteger(Number(value)))
+        setTimeout(() => {
+          if (!(Number.isInteger(Number(value)))) {
+            callback(new Error("请输入数字值"))
+          } else {
+            if (value < 0 || value > 100) {
+              callback(new Error("信用度在0-100"))
+            } else {
+              callback()
+            }
+          }
+        }, 1000)
+      }
+
+      //验证年龄
+      var checkAge = (rule, value, callback) => {
+        console.log(value)
+        console.log(Number.isInteger(Number(value)))
+        setTimeout(() => {
+          if (!(Number.isInteger(Number(value)))) {
+            callback(new Error("请输入数字值"))
+          } else {
+            if (value < 0 || value > 150) {
+              callback(new Error("年龄在0-150"))
+            } else {
+              callback()
+            }
+          }
+        }, 1000)
+      }
+
       //验证邮箱规则
       var checkEmail = (rule, value, cb) => {
         const regEmail = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+([a-zA-Z0-9_-])+/
@@ -147,6 +224,24 @@
       }
 
       return {
+        //用户类型
+        userType:[{
+          value: '游客',
+          label: '游客'
+        }, {
+          value: '住户',
+          label: '住户'
+        }],
+
+        //用户性别
+        sexType:[{
+          value: '男',
+          label: '男'
+        }, {
+          value: '女',
+          label: '女'
+        }],
+
         // 获取用户列表参数对象
         queryInfo: {
           query: "",
@@ -161,15 +256,23 @@
         updateDialogVisible: false,
         //添加用户表单
         addForm: {
-          username: "",
-          password: "",
-          email: "",
-          mobile: ""
+          username:"",
+          password:"",
+          name: "",
+          icon: "",
+          signature: "",
+          nickname: "",
+          age: "",
+          sex: "",
+          phone: "",
+          email: ""
         },
         updateForm: {
-          username: "",
+          name: "",
+          phone:"",
           email: "",
-          mobile: ""
+          credibility: 100,
+          userType: ""
         },
         //添加用户验证规则
         addFormRules: {
@@ -185,18 +288,40 @@
           password: [
             { required: true, message: "请输入密码", trigger: "blur" },
             {
-              min: 3,
-              max: 10,
-              message: "用户名长度为3-10",
+              min: 8,
+              max: 18,
+              message: "密码长度为3-10",
               trigger: "blur"
             }
           ],
+          name: [
+            { required: true, message: "请输入名字", trigger: "blur" },
+            {
+              min: 1,
+              max: 30,
+              message: "名字长度为1-30",
+              trigger: "blur"
+            }
+          ],
+          nickname: [
+            { required: true, message: "请输入昵称", trigger: "blur" },
+            {
+              min: 1,
+              max: 30,
+              message: "昵称长度为1-30",
+              trigger: "blur"
+            }
+          ],
+          age: [
+            { required: true, message: "请输入年龄", trigger: "blur" },
+            { validator: checkAge, trigger: "blur" }
+          ],
           email: [
-            { required: true, message: "请输入密码", trigger: "blur" },
+            { required: true, message: "请输入邮箱号", trigger: "blur" },
             { validator: checkEmail, trigger: "blur" }
           ],
-          mobile: [
-            { required: true, message: "请输入密码", trigger: "blur" },
+          phone: [
+            { required: true, message: "请输入手机号", trigger: "blur" },
             { validator: checkMobile, trigger: "blur" }
           ]
         },
@@ -208,8 +333,8 @@
     },
     created() {
       this.$axios({
-        method: "post",
-        url: "http://localhost:8080/listUser",
+        method: "get",
+        url: "http://localhost:8090/bbs_manager/user/listUser",
         data: {
           pageNum: this.queryInfo.pagenum,
           pageSize: this.queryInfo.pagesize
@@ -281,7 +406,18 @@
         // this.addDialogVisible = false
         this.$refs.addFormRef.validate(valid => {
           if (!valid) return
-          //发起添加用户请求
+        })
+
+        console.log(this.addForm)
+        var addFormData = this.addForm
+        //发起添加用户请求
+        this.$axios.post("http://localhost:8091/bbs_client/user/create",
+          this.addForm,
+          {headers: {
+            "Content-Type": "application/json"
+          }
+        }).then(res => {
+          console.log(res)
         })
       },
       //修改用户
@@ -290,8 +426,8 @@
         this.$refs.updateFormRef.validate(valid => {
           console.log(valid)
           if (!valid) return
-          //发起修改用户请求
         })
+        //发起修改用户请求
       },
       //添加用户表单关闭
       addDialogClosed() {
@@ -300,9 +436,12 @@
       },
       editUser(index, row) {
         //优化：通过id查询用户信息，表单重置
-        this.updateForm.username = row.username
+        this.updateForm.name = row.name
         this.updateForm.email = row.email
-        this.updateForm.mobile = row.mobile
+        this.updateForm.phone = row.phone
+        this.updateForm.credibility = row.credibility
+        this.updateForm.userType = row.userType
+        this.value = row.userType
         this.updateDialogVisible = true
       },
       async deletUser(id) {
