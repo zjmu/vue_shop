@@ -18,18 +18,71 @@
     <!-- 卡片视图 -->
     <el-card class="box-card">
       <!-- 搜索与添加区域 -->
-      <el-row :gutter="20">
-        <el-col :span="10">
-          <el-input placeholder="请输入内容" v-model="queryInfo.query" clearable @clear="getUserList">
-            <el-button slot="append" icon="el-icon-search" @click="getUserList"></el-button>
-          </el-input>
+      <el-row :gutter="20" style="margin-bottom:30px">
+        <el-col :span="1.1">手机号</el-col>
+        <el-col :span="8">
+          <el-input
+            size="small"
+            placeholder="请输入内容"
+            v-model="queryInfo.phone"
+            clearable
+            @clear="getUserList"
+          ></el-input>
         </el-col>
-        <el-col :span="4">
-          <el-button type="primary" @click="addDialogVisible = true">
-            添加用户
-          </el-button>
+        <el-col :span="1.1" style="margin-left:40px">账号状态</el-col>
+        <el-col :span="8">
+          <el-select size="small" v-model="queryInfo.state" clearable placeholder="请选择">
+            <el-option
+              v-for="item in stateType"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            ></el-option>
+          </el-select>
         </el-col>
       </el-row>
+
+      <el-row :gutter="20" style="margin-bottom:30px">
+        <el-col :span="1.1">姓名</el-col>
+        <el-col :span="8">
+          <el-input size="small" placeholder="请输入内容" v-model="queryInfo.name" clearable></el-input>
+        </el-col>
+        <el-col :span="1.1" style="margin-left:40px">注册日期</el-col>
+        <el-col :span="8">
+          <div class="block">
+            <el-date-picker
+              size="small"
+              v-model="queryInfo.time"
+              type="daterange"
+              align="right"
+              unlink-panels
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              :picker-options="pickerOptions"
+            ></el-date-picker>
+          </div>
+        </el-col>
+      </el-row>
+      <el-row justify="center" style="margin-bottom:30px">
+        <el-button type="warning" size="small" style="display:block;margin:0 auto" @click="getUserList">查询</el-button>
+      </el-row>
+      <el-row>
+        <el-button type="primary" size="small" @click="addDialogVisible = true">添加用户</el-button>
+      </el-row>
+
+<!--      <el-row :gutter="20">-->
+<!--        <el-col :span="10">-->
+<!--          <el-input placeholder="请输入内容" v-model="queryInfo.query" clearable @clear="getUserList">-->
+<!--            <el-button slot="append" icon="el-icon-search" @click="getUserList"></el-button>-->
+<!--          </el-input>-->
+<!--        </el-col>-->
+<!--        <el-col :span="4">-->
+<!--          <el-button type="primary" @click="addDialogVisible = true">-->
+<!--            添加用户-->
+<!--          </el-button>-->
+<!--        </el-col>-->
+<!--      </el-row>-->
 
       <!-- 用户列表区域 -->
       <el-table :data="userList" border stripe height="380">
@@ -224,6 +277,37 @@
       }
 
       return {
+        pickerOptions: {
+          shortcuts: [
+            {
+              text: "最近一周",
+              onClick(picker) {
+                const end = new Date()
+                const start = new Date()
+                start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+                picker.$emit("pick", [start, end])
+              }
+            },
+            {
+              text: "最近一个月",
+              onClick(picker) {
+                const end = new Date()
+                const start = new Date()
+                start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+                picker.$emit("pick", [start, end])
+              }
+            },
+            {
+              text: "最近三个月",
+              onClick(picker) {
+                const end = new Date()
+                const start = new Date()
+                start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+                picker.$emit("pick", [start, end])
+              }
+            }
+          ]
+        },
         //用户类型
         userType:[{
           value: '游客',
@@ -231,6 +315,13 @@
         }, {
           value: '住户',
           label: '住户'
+        }],
+        stateType:[{
+          value: '可用',
+          label: '可用'
+        }, {
+          value: '冻结',
+          label: '冻结'
         }],
 
         //用户性别
@@ -244,7 +335,10 @@
 
         // 获取用户列表参数对象
         queryInfo: {
-          query: "",
+          phone: "",
+          name:"",
+          time:"",
+          state:"",
           // 当前的页数
           pagenum: 1,
           // 当前每页显示多少数据
@@ -290,7 +384,7 @@
             {
               min: 8,
               max: 18,
-              message: "密码长度为3-10",
+              message: "密码长度为8-18",
               trigger: "blur"
             }
           ],
@@ -334,7 +428,7 @@
     created() {
       this.$axios({
         method: "get",
-        url: "http://localhost:8090/bbs_manager/user/listUser",
+        url: "http://localhost:8091/bbs_client/user/listUser",
         data: {
           pageNum: this.queryInfo.pagenum,
           pageSize: this.queryInfo.pagesize
@@ -352,7 +446,41 @@
     },
     methods: {
       getUserList() {
-        console.log(this.queryInfo)
+        var param = {
+          pageNum: this.queryInfo.pagenum,
+          pageSize: this.queryInfo.pagesize,
+          name: this.queryInfo.name,
+          phone: this.queryInfo.phone,
+          state: this.queryInfo.state,
+          endTime:this.queryInfo.time[1],
+          startTime: this.queryInfo.time[0]
+        }
+        console.log(param)
+        console.log(param.endTime)
+
+        this.$axios.get("http://localhost:8091/bbs_client/user/getByCondition",
+          {params:param
+          }).then(res => {
+          console.log(res)
+          this.total = res.data.data.total
+          this.queryInfo.pagenum = res.data.data.pageNum
+          this.queryInfo.pagesize = res.data.data.size
+          this.userList = res.data.data.list
+        })
+        // this.$axios({
+        //   method: "get",
+        //   url: "http://localhost:8091/bbs_client/user/getByCondition",
+        //   data: param,
+        //   headers: {
+        //     "Content-Type": "application/json"
+        //   }
+        // }).then(res => {
+        //   console.log(res)
+        //   this.total = res.data.data.total
+        //   this.queryInfo.pagenum = res.data.data.pageNum
+        //   this.queryInfo.pagesize = res.data.data.size
+        //   this.userList = res.data.data.list
+        // })
       },
       //监听pagesize改变事件
       handleSizeChange(newSize) {
