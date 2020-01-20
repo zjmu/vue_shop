@@ -71,22 +71,10 @@
         <el-button type="primary" size="small" @click="addDialogVisible = true">添加用户</el-button>
       </el-row>
 
-<!--      <el-row :gutter="20">-->
-<!--        <el-col :span="10">-->
-<!--          <el-input placeholder="请输入内容" v-model="queryInfo.query" clearable @clear="getUserList">-->
-<!--            <el-button slot="append" icon="el-icon-search" @click="getUserList"></el-button>-->
-<!--          </el-input>-->
-<!--        </el-col>-->
-<!--        <el-col :span="4">-->
-<!--          <el-button type="primary" @click="addDialogVisible = true">-->
-<!--            添加用户-->
-<!--          </el-button>-->
-<!--        </el-col>-->
-<!--      </el-row>-->
-
       <!-- 用户列表区域 -->
       <el-table :data="userList" border stripe height="380">
         <el-table-column type="index"></el-table-column>
+        <el-table-column label="id" prop="id" v-if="false"></el-table-column>
         <el-table-column label="姓名" prop="name"></el-table-column>
         <el-table-column label="签名" prop="signature"></el-table-column>
         <el-table-column label="邮箱" prop="email"></el-table-column>
@@ -96,7 +84,7 @@
         <el-table-column label="创建时间" prop="createTime"></el-table-column>
         <el-table-column label="信用度" prop="credibility"></el-table-column>
         <el-table-column label="用户类型" prop="userType"></el-table-column>
-        <el-table-column label="状态">
+        <el-table-column label="是否冻结">
           <!-- 作用域插槽： slot-scope接收作用域数据.row获取对应行数据 -->
           <template slot-scope="scope">
             <el-switch v-model="scope.row.state" @change="userStateChanged(scope.row)"></el-switch>
@@ -178,10 +166,9 @@
     <!-- 修改用户对话框 -->
     <el-dialog title="修改用户信息" :visible.sync="updateDialogVisible"
                width="50%">
-
       <!-- 内容主体区域 -->
       <el-form :model="updateForm" :rules="addFormRules" ref="updateFormRef" label-width="70px">
-        <el-form-item label="用户名" prop="name">
+        <el-form-item label="姓名" prop="name">
           <el-input v-model="updateForm.name"></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
@@ -194,14 +181,14 @@
           <el-input v-model="updateForm.credibility"></el-input>
         </el-form-item>
         <el-form-item label="用户类型" prop="userType">
-            <el-select size="small" v-model="updateForm.userType" clearable placeholder="请选择用户类型">
-              <el-option
-                v-for="item in userType"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-select>
+          <el-select size="small" v-model="updateForm.userType" clearable placeholder="请选择用户类型">
+            <el-option
+              v-for="item in userType"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
       </el-form>
 
@@ -309,36 +296,36 @@
           ]
         },
         //用户类型
-        userType:[{
-          value: '游客',
-          label: '游客'
+        userType: [{
+          value: "游客",
+          label: "游客"
         }, {
-          value: '住户',
-          label: '住户'
+          value: "住户",
+          label: "住户"
         }],
-        stateType:[{
-          value: '可用',
-          label: '可用'
+        stateType: [{
+          value: "已删除",
+          label: "已删除"
         }, {
-          value: '冻结',
-          label: '冻结'
+          value: "正常",
+          label: "正常"
         }],
 
         //用户性别
-        sexType:[{
-          value: '男',
-          label: '男'
+        sexType: [{
+          value: "男",
+          label: "男"
         }, {
-          value: '女',
-          label: '女'
+          value: "女",
+          label: "女"
         }],
 
         // 获取用户列表参数对象
         queryInfo: {
           phone: "",
-          name:"",
-          time:"",
-          state:"",
+          name: "",
+          time: ["", ""],
+          state: "",
           // 当前的页数
           pagenum: 1,
           // 当前每页显示多少数据
@@ -350,8 +337,8 @@
         updateDialogVisible: false,
         //添加用户表单
         addForm: {
-          username:"",
-          password:"",
+          username: "",
+          password: "",
           name: "",
           icon: "",
           signature: "",
@@ -362,10 +349,11 @@
           email: ""
         },
         updateForm: {
+          id: "",
           name: "",
-          phone:"",
+          phone: "",
           email: "",
-          credibility: 100,
+          credibility: "",
           userType: ""
         },
         //添加用户验证规则
@@ -420,109 +408,58 @@
           ]
         },
 
-
         userList: []
         // total
       }
     },
     created() {
-      this.$axios({
-        method: "get",
-        url: "http://localhost:8091/bbs_client/user/listUser",
-        data: {
-          pageNum: this.queryInfo.pagenum,
-          pageSize: this.queryInfo.pagesize
-        },
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }).then(res => {
-        console.log(res)
-        this.total = res.data.data.total
-        this.queryInfo.pagenum = res.data.data.pageNum
-        this.queryInfo.pagesize = res.data.data.size
-        this.userList = res.data.data.list
-      })
+     this.getUserList()
     },
     methods: {
       getUserList() {
-        var param = {
-          pageNum: this.queryInfo.pagenum,
-          pageSize: this.queryInfo.pagesize,
-          name: this.queryInfo.name,
-          phone: this.queryInfo.phone,
-          state: this.queryInfo.state,
-          endTime:this.queryInfo.time[1],
-          startTime: this.queryInfo.time[0]
+        let param
+        if (this.queryInfo.time != null) {
+          param = {
+            pageNum: this.queryInfo.pagenum,
+            pageSize: this.queryInfo.pagesize,
+            name: this.queryInfo.name,
+            phone: this.queryInfo.phone,
+            state: this.queryInfo.state,
+            endTime: this.queryInfo.time[1],
+            startTime: this.queryInfo.time[0]
+          }
+        } else {
+          param = {
+            pageNum: this.queryInfo.pagenum,
+            pageSize: this.queryInfo.pagesize,
+            name: this.queryInfo.name,
+            phone: this.queryInfo.phone,
+            state: this.queryInfo.state
+          }
         }
+
         console.log(param)
-        console.log(param.endTime)
 
         this.$axios.get("http://localhost:8091/bbs_client/user/getByCondition",
-          {params:param
+          {
+            params: param
           }).then(res => {
           console.log(res)
           this.total = res.data.data.total
           this.queryInfo.pagenum = res.data.data.pageNum
-          this.queryInfo.pagesize = res.data.data.size
           this.userList = res.data.data.list
         })
-        // this.$axios({
-        //   method: "get",
-        //   url: "http://localhost:8091/bbs_client/user/getByCondition",
-        //   data: param,
-        //   headers: {
-        //     "Content-Type": "application/json"
-        //   }
-        // }).then(res => {
-        //   console.log(res)
-        //   this.total = res.data.data.total
-        //   this.queryInfo.pagenum = res.data.data.pageNum
-        //   this.queryInfo.pagesize = res.data.data.size
-        //   this.userList = res.data.data.list
-        // })
       },
       //监听pagesize改变事件
       handleSizeChange(newSize) {
         console.log(newSize)
         this.queryInfo.pagesize = newSize
-        this.$axios({
-          method: "post",
-          url: "http://localhost:8080/listUser",
-          data: {
-            pageNum: this.queryInfo.pagenum,
-            pageSize: newSize
-          },
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }).then(res => {
-          console.log(res)
-          this.total = res.data.data.total
-          this.queryInfo.pagenum = res.data.data.pageNum
-          this.userList = res.data.data.list
-        })
+        this.getUserList()
       },
       //监听页码值改变
       handleCurrentChange(newPage) {
         this.queryInfo.pagenum = newPage
-        //重新发送请求
-        this.$axios({
-          method: "post",
-          url: "http://localhost:8080/listUser",
-          data: {
-            pageNum: newPage,
-            pageSize: this.queryInfo.pagesize
-          },
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }).then(res => {
-          console.log(res)
-          this.total = res.data.data.total
-          this.queryInfo.pagenum = res.data.data.pageNum
-          this.userList = res.data.data.list
-        })
+        this.getUserList()
       },
       // 监听开关状态改变
       userStateChanged(userInfo) {
@@ -533,19 +470,31 @@
       addUser() {
         // this.addDialogVisible = false
         this.$refs.addFormRef.validate(valid => {
-          if (!valid) return
-        })
-
-        console.log(this.addForm)
-        var addFormData = this.addForm
-        //发起添加用户请求
-        this.$axios.post("http://localhost:8091/bbs_client/user/create",
-          this.addForm,
-          {headers: {
-            "Content-Type": "application/json"
+          if (!valid) {
+            return
           }
-        }).then(res => {
-          console.log(res)
+          console.log(this.addForm)
+          //发起添加用户请求
+          this.$axios.post("http://localhost:8091/bbs_client/user/create",
+            this.addForm,
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }).then(res => {
+            if (res.data.code == 0) {
+              this.$message({
+                type: "success",
+                message: res.data.data
+              })
+              this.created()
+            } else {
+              this.$message({
+                type: "info",
+                message: res.data.message
+              })
+            }
+          })
         })
       },
       //修改用户
@@ -553,9 +502,32 @@
         // this.addDialogVisible = false
         this.$refs.updateFormRef.validate(valid => {
           console.log(valid)
-          if (!valid) return
+          if (!valid) {
+            return
+          }
+          console.log(this.updateForm)
+          this.$axios.put("http://localhost:8091/bbs_client/user/updataUser",
+            this.updateForm,
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }).then(res => {
+              console.log(res)
+              if (res.data.code == 0) {
+                this.$message({
+                  type: "success",
+                  message: res.data.data
+                })
+                this.getUserList()
+              } else {
+                this.$message({
+                  type: "info",
+                  message: res.data.message
+                })
+              }
+          })
         })
-        //发起修改用户请求
       },
       //添加用户表单关闭
       addDialogClosed() {
@@ -563,13 +535,12 @@
         this.$refs.addFormRef.resetFields()
       },
       editUser(index, row) {
-        //优化：通过id查询用户信息，表单重置
+        this.updateForm.id = row.id
         this.updateForm.name = row.name
         this.updateForm.email = row.email
         this.updateForm.phone = row.phone
         this.updateForm.credibility = row.credibility
         this.updateForm.userType = row.userType
-        this.value = row.userType
         this.updateDialogVisible = true
       },
       async deletUser(id) {

@@ -10,20 +10,43 @@
     <!-- 卡片视图 -->
     <el-card class="box-card">
 
-<!--      选择标签类型-->
-      <el-select v-model="value" placeholder="请选择" class="select">
-        <el-option
-          v-for="item in options"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value">
-        </el-option>
-      </el-select>
+      <el-row :gutter="20" style="margin-bottom:30px">
+        <el-col :span="1.1">标签名</el-col>
+        <el-col :span="8">
+          <el-input
+            size="small"
+            placeholder="请输入内容"
+            v-model="queryInfo.label"
+            clearable
+          ></el-input>
+        </el-col>
+        <!--选择标签类型-->
+        <el-col :span="1.1" style="margin-left:40px">标签状态</el-col>
+        <el-col :span="8">
+          <el-select v-model="queryInfo.state" placeholder="请选择" class="select" size="small">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-col>
+      </el-row>
+
+      <el-row justify="center" style="margin-bottom:30px">
+        <el-button type="warning" size="small" style="display:block;margin:0 auto" @click="listLabel">查询</el-button>
+      </el-row>
 
       <el-row justify="center">
-        <el-button type="primary" size="small" icon="el-icon-circle-plus-outline" @click="addDialogVisible = true">新建</el-button>
-        <el-button type="primary" size="small" icon="el-icon-edit" :disabled="templateSelection>-1?false:true" @click="updateDialogVisible = true">修改</el-button>
-        <el-button type="danger" size="small" icon="el-icon-delete" :disabled="templateSelection>-1?false:true" @click="deleteLabel">删除</el-button>
+        <el-button type="primary" size="small" icon="el-icon-circle-plus-outline" @click="addDialogVisible = true">新建
+        </el-button>
+        <el-button type="primary" size="small" icon="el-icon-edit" :disabled="templateSelection>-1?false:true"
+                   @click="updateDialogVisible = true">修改
+        </el-button>
+        <el-button type="danger" size="small" icon="el-icon-delete" :disabled="templateSelection>-1?false:true"
+                   @click="deleteLabel">删除
+        </el-button>
       </el-row>
 
       <!-- 标签列表区域 -->
@@ -41,9 +64,10 @@
         </el-table-column>
         <el-table-column label="标签" prop="label"></el-table-column>
         <el-table-column label="编号" prop="code"></el-table-column>
-        <el-table-column label="操作人" prop="operator"></el-table-column>
+        <el-table-column label="操作人" prop="opName"></el-table-column>
         <el-table-column label="重要程度" prop="weight"></el-table-column>
-        <el-table-column label="操作时间" prop="opTime"></el-table-column>
+        <el-table-column label="状态" prop="stateString"></el-table-column>
+        <el-table-column label="操作时间" prop="createTime"></el-table-column>
       </el-table>
 
       <!-- 分页 -->
@@ -63,7 +87,7 @@
                width="50%" @close="addDialogClosed">
 
       <!-- 内容主体区域 -->
-      <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px" >
+      <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px">
         <el-form-item label="标签" prop="label">
           <el-input v-model="addForm.label"></el-input>
         </el-form-item>
@@ -124,26 +148,24 @@
       }
       return {
         //是否添加,修改
-        addDialogVisible:false,
+        addDialogVisible: false,
         updateDialogVisible: false,
         //标签选项
         options: [{
-          value: '选项1',
-          label: '全部标签'
+          value: "全部标签",
+          label: "全部标签"
         }, {
-          value: '选项2',
-          label: '可用标签'
+          value: "正常",
+          label: "可用标签"
         }, {
-          value: '选项3',
-          label: '失效标签'
+          value: "已删除",
+          label: "失效标签"
         }],
-        value: '',
         // 获取用户列表参数对象
         queryInfo: {
-          query: '',
-          // 当前的页数
+          label: "",
+          state:"",
           pagenum: 1,
-          // 当前每页显示多少数据
           pagesize: 10
         },
         total: 200,
@@ -151,35 +173,53 @@
           label: "",
           code: "",
           operator: "",
-          weight:"",
+          weight: "",
           opTime: ""
         },
-        labelList:[],
+        labelList: [],
         addForm: {
-          label:"",
-          weight:""
+          label: "",
+          weight: ""
         },
         addFormRules: {
           label: [
-            { required: true, message:'请输入标签名',trigger:'blur' },
-            {min:1, max:10, message: '标签名长度为1-10', trigger:'blur'}
+            { required: true, message: "请输入标签名", trigger: "blur" },
+            { min: 1, max: 10, message: "标签名长度为1-10", trigger: "blur" }
           ],
           weight: [
-            { required: true, message:'请输入权重'},
-            { validator: checkWeight, trigger: 'blur'}
+            { required: true, message: "请输入权重" },
+            { validator: checkWeight, trigger: "blur" }
           ]
         },
         updateForm: {
-          label:"",
-          code:"",
-          weight:""
+          label: "",
+          code: "",
+          weight: ""
         },
-        templateSelection:-1,
-        templateRadio:-1
+        templateSelection: -1,
+        templateRadio: -1
 
       }
     },
+    created() {
+
+    },
     methods: {
+      //查询标签
+      listLabel() {
+        console.log(this.queryInfo)
+        this.$axios.get("http://localhost:8091/bbs_client/label/listLabelByCondition",
+          {
+            params:this.queryInfo,
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }).then(res => {
+            console.log(res)
+            this.labelList = res.data.data.list
+            console.log(this.labelList)
+          })
+      },
       //更新标签
       updateLabel() {
         console.log(this.templateSelection)
@@ -199,52 +239,52 @@
         console.log(newSize)
         this.queryInfo.pagesize = newSize
         this.$axios({
-          method: 'post',
-          url: 'http://localhost:8080/listUser',
+          method: "post",
+          url: "http://localhost:8080/listUser",
           data: {
-            pageNum:this.queryInfo.pagenum,
-            pageSize:newSize
+            pageNum: this.queryInfo.pagenum,
+            pageSize: newSize
           },
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json"
           }
         }).then(res => {
           console.log(res)
-          this.total = res.data.data.total;
+          this.total = res.data.data.total
           this.queryInfo.pagenum = res.data.data.pageNum
           this.userList = res.data.data.list
-        });
+        })
       },
       //监听页码值改变
       handleCurrentChange(newPage) {
         this.queryInfo.pagenum = newPage
         //重新发送请求
         this.$axios({
-          method: 'post',
-          url: 'http://localhost:8080/listUser',
+          method: "post",
+          url: "http://localhost:8080/listUser",
           data: {
-            pageNum:newPage,
-            pageSize:this.queryInfo.pagesize
+            pageNum: newPage,
+            pageSize: this.queryInfo.pagesize
           },
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json"
           }
         }).then(res => {
           console.log(res)
-          this.total = res.data.data.total;
+          this.total = res.data.data.total
           this.queryInfo.pagenum = res.data.data.pageNum
           this.userList = res.data.data.list
-        });
+        })
       },
       addDialogClosed() {
-        console.log('重置')
+        console.log("重置")
         this.$refs.addFormRef.resetFields()
       },
       //添加标签
       addLabel() {
         this.addDialogVisible = false
         this.$refs.addFormRef.validate(valid => {
-          if(!valid) return
+          if (!valid) return
           //发起添加用户请求
         })
       }
@@ -253,7 +293,7 @@
 </script>
 
 <style scoped>
-.el-select {
-  margin-bottom: 30px;
-}
+  .el-select {
+    margin-bottom: 30px;
+  }
 </style>
