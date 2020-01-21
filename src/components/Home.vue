@@ -49,7 +49,7 @@ export default {
         return {
             menulist: [{id: 1, authName:"用户管理", child:[{id:1,name:'查看用户信息',path:'userList'},{id:2,name:'用户黑名单',path:'blackList'}]},
                        {id: 2, authName:"系统设置", child:[{id:3,name:'标题设置',path:'label'},{id:4,name:'违规原因设置',path:'reason'}]},
-                       {id: 3, authName:"审核文章", child:[{id:5,name:'系统文章',path:'article'},{id:6,name:'文章审核',path:'reviewArticle'},{id:6,name:'评论审核',path:'reviewComment'}]},
+                       {id: 3, authName:"文章管理", child:[{id:5,name:'系统文章',path:'article'},{id:6,name:'文章审核',path:'reviewArticle'},{id:6,name:'评论审核',path:'reviewComment'}]},
                        {id: 4, authName:"统计系统数据", child:[{id:5,name:'主题文章',path:'manager'}]},
                        {id: 5, authName:"个人信息管理", child:[{id:5,name:'个人信息',path:'manager'}]}],
 

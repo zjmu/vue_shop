@@ -3,8 +3,8 @@
     <!-- 面包屑导航区 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
-      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+      <el-breadcrumb-item>文章管理</el-breadcrumb-item>
+      <el-breadcrumb-item>审核文章</el-breadcrumb-item>
     </el-breadcrumb>
 
     <!-- 卡片视图 -->
@@ -15,7 +15,7 @@
         <el-input
           size="small"
           placeholder="请输入内容"
-          v-model="queryInfo.query"
+          v-model="queryInfo.articleCode"
           clearable
           @clear="getUserList"
         ></el-input>
@@ -23,12 +23,12 @@
         <el-input
           size="small"
           placeholder="请输入内容"
-          v-model="queryInfo.query"
+          v-model="queryInfo.userId"
           clearable
           @clear="getUserList"
         ></el-input>
         <div class="title">标签</div>
-        <el-select size="small" v-model="value" clearable placeholder="请选择" style="margin-right: 0px">
+        <el-select size="small" v-model="queryInfo.labelId" clearable placeholder="请选择" style="margin-right: 0px">
           <el-option
             v-for="item in option"
             :key="item.value"
@@ -40,9 +40,9 @@
       <!--      第二行-->
       <div class="line">
         <div class="title">状态</div>
-        <el-select size="small" v-model="value" clearable placeholder="请选择" >
+        <el-select size="small" v-model="queryInfo.reviewStatus" clearable placeholder="请选择" >
           <el-option
-            v-for="item in option"
+            v-for="item in reviewStatus"
             :key="item.value"
             :label="item.label"
             :value="item.value"
@@ -51,7 +51,7 @@
         <div class="time">创建日期</div>
         <el-date-picker
           size="small"
-          v-model="value2"
+          v-model="queryInfo.time"
           type="daterange"
           align="right"
           unlink-panels
@@ -67,7 +67,7 @@
       </div>
 
       <div class="button">
-        <el-button type="primary" size="small" icon="el-icon-circle-plus-outline">新建</el-button>
+        <el-button type="primary" size="small" icon="el-icon-circle-plus-outline" @click="disableArticle">禁止</el-button>
         <el-button type="primary" size="small" icon="el-icon-time" :disabled="templateSelection>-1?false:true">查看</el-button>
         <!--        删除-->
         <el-button type="primary" size="small" icon="el-icon-delete" :disabled="templateSelection>-1?false:true">删除</el-button>
@@ -80,7 +80,7 @@
       </div>
 
       <!--表格区域-->
-      <el-table :data="userList" border stripe height="380" style="margin-left:30px; width:95%; bottom: 20px">
+      <el-table :data="articleReviewList" border stripe height="380" style="margin-left:30px; width:95%; bottom: 20px">
         <el-table-column type width="50px" label="选择">
           <template scope="scope">
             <el-radio
@@ -92,10 +92,13 @@
             </el-radio>
           </template>
         </el-table-column>
-        <el-table-column label="手机号" prop="username"></el-table-column>
-        <el-table-column label="惩罚" prop="emial"></el-table-column>
-        <el-table-column label="操作人" prop="phone"></el-table-column>
-        <el-table-column label="操作时间" prop="role_name"></el-table-column>
+        <el-table-column label="用户昵称" prop="nickname"></el-table-column>
+        <el-table-column label="手机号" prop="phone"></el-table-column>
+        <el-table-column label="审核状态" prop="statusString"></el-table-column>
+        <el-table-column label="审核结果" prop="result"></el-table-column>
+        <el-table-column label="审核人员" prop="opName"></el-table-column>
+        <el-table-column label="人员编号" prop="opCode"></el-table-column>
+        <el-table-column label="审核时间" prop="time"></el-table-column>
       </el-table>
     </div>
 
@@ -111,14 +114,14 @@
       :total="total"
     ></el-pagination>
 
-    <!-- 添加用户对话框 -->
-    <el-dialog title="添加用户" :visible.sync="addDialogVisible" width="50%" @close="addDialogClosed">
+    <!-- 禁止文章 -->
+    <el-dialog title="禁止原因" :visible.sync="disableDialogVisible" width="50%" @close="addDialogClosed">
       <!-- 内容主体区域 -->
       <el-form :model="addForm" :rules="addFormRules" ref="updateFormRef" label-width="70px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="addForm.username"></el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="password">
+        <el-form-item label="内容" prop="password">
           <el-input v-model="addForm.password"></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
@@ -189,6 +192,7 @@
       }
 
       return {
+        disableDialogVisible: false,
         pickerOptions: {
           shortcuts: [
             {
@@ -225,7 +229,11 @@
         templateRadio: -1,
         // 获取用户列表参数对象
         queryInfo: {
-          query: "",
+          articleCode:"",
+          userId:"",
+          labelId:"",
+          reviewStatus:"",
+          time: ["", ""],
           // 当前的页数
           pagenum: 1,
           // 当前每页显示多少数据
@@ -276,34 +284,36 @@
             { validator: checkMobile, trigger: "blur" }
           ]
         },
-        userList: [],
+        articleReviewList: [],
         //下拉框选项
-        option: ["禁言一天", "禁言一周", "禁言30天", "永久禁言"]
+        reviewStatus:[{
+          value: "已审核",
+          label: "已审核"
+        }, {
+          value: "未审核",
+          label: "未审核"
+        }]
 
       }
     },
     created() {
-      this.$axios({
-        method: "post",
-        url: "http://localhost:8080/listUser",
-        data: {
-          pageNum: this.queryInfo.pagenum,
-          pageSize: this.queryInfo.pagesize
-        },
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }).then(res => {
-        console.log(res)
-        this.total = res.data.data.total
-        this.queryInfo.pagenum = res.data.data.pageNum
-        this.queryInfo.pagesize = res.data.data.size
-        this.userList = res.data.data.list
-      })
+      this.getArticleReviewList()
     },
     methods: {
-      getWhaitList() {
-        console.log(this.queryInfo)
+      disableArticle() {
+        this.disableDialogVisible = true
+      },
+      getArticleReviewList() {
+        this.$axios.get("http://localhost:8091/bbs_client/aritcleReview/listArticleReview",{
+          data:this.queryInfo,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }).then(res => {
+          console.log("------审核文章------")
+          console.log(res)
+          this.articleReviewList = res.data.data.list
+        })
       },
       getTemplateRow(index, row) {
         this.templateSelection = index

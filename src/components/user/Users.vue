@@ -526,8 +526,8 @@
                   message: res.data.message
                 })
               }
+            })
           })
-        })
       },
       //添加用户表单关闭
       addDialogClosed() {

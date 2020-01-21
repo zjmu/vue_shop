@@ -42,7 +42,7 @@
         <el-button type="primary" size="small" icon="el-icon-circle-plus-outline" @click="addDialogVisible = true">新建
         </el-button>
         <el-button type="primary" size="small" icon="el-icon-edit" :disabled="templateSelection>-1?false:true"
-                   @click="updateDialogVisible = true">修改
+                   @click="updateButton">修改
         </el-button>
         <el-button type="danger" size="small" icon="el-icon-delete" :disabled="templateSelection>-1?false:true"
                    @click="deleteLabel">删除
@@ -74,16 +74,16 @@
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="queryInfo.pagenum"
+        :current-page="queryInfo.pageNum"
         :page-sizes="[5, 10, 15, 20, 30]"
-        :page-size="queryInfo.pagesize"
+        :page-size="queryInfo.pageSize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
       ></el-pagination>
     </el-card>
 
     <!-- 添加标签对话框 -->
-    <el-dialog title="添加用户" :visible.sync="addDialogVisible"
+    <el-dialog title="添加标题" :visible.sync="addDialogVisible"
                width="50%" @close="addDialogClosed">
 
       <!-- 内容主体区域 -->
@@ -105,7 +105,6 @@
 
     <!-- 修改用户对话框 -->
     <el-dialog title="修改用户信息" :visible.sync="updateDialogVisible" width="50%">
-      <!-- 内容主体区域 -->
       <el-form :model="updateForm" :rules="addFormRules" ref="updateFormRef" label-width="70px">
         <el-form-item label="标签名" prop="label">
           <el-input v-model="updateForm.label"></el-input>
@@ -115,6 +114,16 @@
         </el-form-item>
         <el-form-item label="权重" prop="weight">
           <el-input v-model="updateForm.weight"></el-input>
+        </el-form-item>
+        <el-form-item label="状态" prop="state">
+          <el-select v-model="updateForm.state" placeholder="请选择" class="select">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
         </el-form-item>
       </el-form>
 
@@ -152,7 +161,7 @@
         updateDialogVisible: false,
         //标签选项
         options: [{
-          value: "全部标签",
+          value: "",
           label: "全部标签"
         }, {
           value: "正常",
@@ -165,8 +174,8 @@
         queryInfo: {
           label: "",
           state:"",
-          pagenum: 1,
-          pagesize: 10
+          pageNum: 1,
+          pageSize: 10
         },
         total: 200,
         labelForm: {
@@ -194,7 +203,8 @@
         updateForm: {
           label: "",
           code: "",
-          weight: ""
+          weight: "",
+          state: ""
         },
         templateSelection: -1,
         templateRadio: -1
@@ -202,7 +212,7 @@
       }
     },
     created() {
-
+      this.listLabel()
     },
     methods: {
       //查询标签
@@ -216,17 +226,90 @@
             }
           }).then(res => {
             console.log(res)
+            this.total = res.data.data.total
+            this.queryInfo.pageNum = res.data.data.pageNum
             this.labelList = res.data.data.list
-            console.log(this.labelList)
           })
+      },
+      updateButton() {
+        this.updateDialogVisible = true
+        const index = this.templateSelection
+        this.updateForm.id = this.labelList[index].id
+        this.updateForm.label = this.labelList[index].label
+        this.updateForm.code = this.labelList[index].code
+        this.updateForm.weight = this.labelList[index].weight
+        this.updateForm.state = this.labelList[index].stateString
+        console.log(this.updateForm)
       },
       //更新标签
       updateLabel() {
-        console.log(this.templateSelection)
+        this.updateDialogVisible = false
+        this.$refs.updateFormRef.validate(valid => {
+          console.log(valid)
+          if (!valid) {
+            return
+          }
+          this.$axios.put("http://localhost:8091/bbs_client/label/updateLabel",
+            this.updateForm,
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }).then(res => {
+            console.log(res)
+            if (res.data.code == 0) {
+              this.$message({
+                type: "success",
+                message: res.data.data
+              })
+              this.listLabel()
+            } else {
+              this.$message({
+                type: "info",
+                message: res.data.message
+              })
+            }
+          }).catch(res => {
+            console.log(res)
+          })
+        })
       },
       //删除标签
-      deleteLabel() {
-        console.log(this.templateSelection)
+      async deleteLabel() {
+        this.$confirm("此操作将永久删除该标签, 是否继续?", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(() => {
+          const index = this.templateSelection
+          this.$axios.delete("http://localhost:8091/bbs_client/label/deleteLabel/" + this.labelList[index].id,
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }).then(res => {
+            console.log(res)
+            if (res.data.code == 0) {
+              this.$message({
+                type: "success",
+                message: res.data.data
+              })
+              this.listLabel()
+            } else {
+              this.$message({
+                type: "info",
+                message: res.data.message
+              })
+            }
+          }).catch(res => {
+            console.log(res)
+          })
+        }).catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          })
+        })
       },
       //将行id赋值
       getTemplateRow(index, row) {
@@ -236,49 +319,25 @@
       },
       //监听pagesize改变事件
       handleSizeChange(newSize) {
-        console.log(newSize)
-        this.queryInfo.pagesize = newSize
-        this.$axios({
-          method: "post",
-          url: "http://localhost:8080/listUser",
-          data: {
-            pageNum: this.queryInfo.pagenum,
-            pageSize: newSize
-          },
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }).then(res => {
-          console.log(res)
-          this.total = res.data.data.total
-          this.queryInfo.pagenum = res.data.data.pageNum
-          this.userList = res.data.data.list
-        })
+        this.queryInfo.pageSize = newSize
+        console.log("页大小值：")
+        console.log(this.queryInfo.pageNum)
+        console.log(this.queryInfo.pageSize)
+
+        this.listLabel()
       },
       //监听页码值改变
       handleCurrentChange(newPage) {
-        this.queryInfo.pagenum = newPage
+        this.queryInfo.pageNum = newPage
+        console.log("页码值：")
+        console.log(this.queryInfo.pageNum)
+        console.log(this.queryInfo.pageSize)
         //重新发送请求
-        this.$axios({
-          method: "post",
-          url: "http://localhost:8080/listUser",
-          data: {
-            pageNum: newPage,
-            pageSize: this.queryInfo.pagesize
-          },
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }).then(res => {
-          console.log(res)
-          this.total = res.data.data.total
-          this.queryInfo.pagenum = res.data.data.pageNum
-          this.userList = res.data.data.list
-        })
+        this.listLabel()
       },
       addDialogClosed() {
-        console.log("重置")
-        this.$refs.addFormRef.resetFields()
+        // console.log("重置")
+        // this.$refs.addFormRef.resetFields()
       },
       //添加标签
       addLabel() {
@@ -286,6 +345,26 @@
         this.$refs.addFormRef.validate(valid => {
           if (!valid) return
           //发起添加用户请求
+          this.$axios.post("http://localhost:8091/bbs_client/label/create",
+          this.addForm,
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+          }).then(res => {
+            if (res.data.code == 0) {
+              this.$message({
+                type: "success",
+                message: res.data.data
+              })
+              this.listLabel()
+            } else {
+              this.$message({
+                type: "info",
+                message: res.data.message
+              })
+            }
+          })
         })
       }
     }
