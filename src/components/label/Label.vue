@@ -94,8 +94,16 @@
         <el-form-item label="权重" prop="weight">
           <el-input v-model="addForm.weight"></el-input>
         </el-form-item>
+        <el-upload
+          class="avatar-uploader"
+          action="http://localhost:8091/bbs_client/article/uploadImage"
+          :show-file-list="false"
+          :on-success="handleAvatarSuccess"
+          :before-upload="beforeAvatarUpload">
+          <img v-if="imgUrl" :src="imgUrl" class="avatar">
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+        </el-upload>
       </el-form>
-
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
             <el-button @click="addDialogVisible = false">取 消</el-button>
@@ -156,6 +164,8 @@
         }, 1000)
       }
       return {
+        //本地地址
+        imgUrl: '',
         //是否添加,修改
         addDialogVisible: false,
         updateDialogVisible: false,
@@ -173,7 +183,7 @@
         // 获取用户列表参数对象
         queryInfo: {
           label: "",
-          state:"",
+          state: "",
           pageNum: 1,
           pageSize: 10
         },
@@ -188,7 +198,8 @@
         labelList: [],
         addForm: {
           label: "",
-          weight: ""
+          weight: "",
+          imageUrl: ""
         },
         addFormRules: {
           label: [
@@ -215,21 +226,33 @@
       this.listLabel()
     },
     methods: {
+      //上传图片
+      handleAvatarSuccess(res, file) {
+        this.imgUrl = URL.createObjectURL(file.raw)
+        this.addForm.imageUrl = res.data
+      },
+      beforeAvatarUpload(file) {
+        const isLt2M = file.size / 1024 / 1024 < 4
+        if (!isLt2M) {
+          this.$message.error("上传头像图片大小不能超过 4MB!")
+        }
+        return isLt2M
+      },
       //查询标签
       listLabel() {
         console.log(this.queryInfo)
         this.$axios.get("http://localhost:8091/bbs_client/label/listLabelByCondition",
           {
-            params:this.queryInfo,
+            params: this.queryInfo,
             headers: {
               "Content-Type": "application/json"
             }
           }).then(res => {
-            console.log(res)
-            this.total = res.data.data.total
-            this.queryInfo.pageNum = res.data.data.pageNum
-            this.labelList = res.data.data.list
-          })
+          console.log(res)
+          this.total = res.data.data.total
+          this.queryInfo.pageNum = res.data.data.pageNum
+          this.labelList = res.data.data.list
+        })
       },
       updateButton() {
         this.updateDialogVisible = true
@@ -345,13 +368,14 @@
         this.$refs.addFormRef.validate(valid => {
           if (!valid) return
           //发起添加用户请求
+          console.log(this.addForm)
           this.$axios.post("http://localhost:8091/bbs_client/label/create",
-          this.addForm,
+            this.addForm,
             {
               headers: {
                 "Content-Type": "application/json"
               }
-          }).then(res => {
+            }).then(res => {
             if (res.data.code == 0) {
               this.$message({
                 type: "success",
@@ -374,5 +398,33 @@
 <style scoped>
   .el-select {
     margin-bottom: 30px;
+  }
+
+  /*上传图片样式*/
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
   }
 </style>

@@ -4,26 +4,59 @@
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
-      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+      <el-breadcrumb-item>违规原因</el-breadcrumb-item>
     </el-breadcrumb>
 
     <!-- 卡片视图 -->
     <el-card class="box-card">
 
-      <!--      选择标签类型-->
-      <el-select v-model="value" placeholder="请选择" class="select">
-        <el-option
-          v-for="item in options"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value">
-        </el-option>
-      </el-select>
+      <!--      管理员编号-->
+      <div class="line">
+        <div class="title">管理员编号</div>
+        <el-input
+          size="small"
+          placeholder="请输入内容"
+          v-model="queryInfo.managerCode"
+          clearable
+        ></el-input>
+
+        <!--      分值小于-->
+        <div class="title">分值小于</div>
+        <el-input
+          size="small"
+          placeholder="请输入内容"
+          v-model="queryInfo.score"
+          clearable
+        ></el-input>
+
+        <!--      创建日期-->
+        <div class="time">创建日期</div>
+        <el-date-picker
+          size="small"
+          v-model="queryInfo.time"
+          type="daterange"
+          align="right"
+          unlink-panels
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :picker-options="pickerOptions"
+        ></el-date-picker>
+      </div>
+
+      <div class="line">
+        <el-button type="warning" size="small" style="display:block;margin:0 auto" @click="showReason">查询</el-button>
+      </div>
 
       <el-row justify="center">
-        <el-button type="primary" size="small" icon="el-icon-circle-plus-outline" @click="addDialogVisible = true">新建</el-button>
-        <el-button type="primary" size="small" icon="el-icon-edit" :disabled="templateSelection>-1?false:true" @click="updateDialogVisible = true">修改</el-button>
-        <el-button type="danger" size="small" icon="el-icon-delete" :disabled="templateSelection>-1?false:true" @click="deleteReason">修改</el-button>
+        <el-button type="primary" size="small" icon="el-icon-circle-plus-outline" @click="addDialogVisible = true">新建
+        </el-button>
+        <el-button type="primary" size="small" icon="el-icon-edit" :disabled="templateSelection>-1?false:true"
+                   @click="updateClick">修改
+        </el-button>
+        <el-button type="danger" size="small" icon="el-icon-delete" :disabled="templateSelection>-1?false:true"
+                   @click="deleteReason">删除
+        </el-button>
       </el-row>
 
       <!-- 标签列表区域 -->
@@ -39,10 +72,9 @@
             </el-radio>
           </template>
         </el-table-column>
-        <el-table-column label="违规原因" prop="reason"></el-table-column>
-        <el-table-column label="编号" prop="code"></el-table-column>
-        <el-table-column label="操作人" prop="operator"></el-table-column>
-        <el-table-column label="权值" prop="weight"></el-table-column>
+        <el-table-column label="违规原因" prop="content"></el-table-column>
+        <el-table-column label="操作人" prop="opName"></el-table-column>
+        <el-table-column label="分值" prop="score"></el-table-column>
         <el-table-column label="操作时间" prop="opTime"></el-table-column>
       </el-table>
 
@@ -58,17 +90,17 @@
       ></el-pagination>
     </el-card>
 
-    <!-- 添加标签对话框 -->
+    <!-- 添加违规规则对话框 -->
     <el-dialog title="添加违规规则" :visible.sync="addDialogVisible"
-               width="50%" @close="addDialogClosed">
+               width="50%">
 
       <!-- 内容主体区域 -->
-      <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px" >
-        <el-form-item label="规则" prop="reason">
-          <el-input v-model="addForm.reason"></el-input>
+      <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px">
+        <el-form-item label="规则" prop="content">
+          <el-input v-model="addForm.content"></el-input>
         </el-form-item>
-        <el-form-item label="权重" prop="weight">
-          <el-input v-model="addForm.weight"></el-input>
+        <el-form-item label="权重" prop="score">
+          <el-input v-model="addForm.score"></el-input>
         </el-form-item>
       </el-form>
 
@@ -80,17 +112,14 @@
     </el-dialog>
 
     <!-- 修改用户对话框 -->
-    <el-dialog title="修改用户信息" :visible.sync="updateDialogVisible" width="50%">
+    <el-dialog title="修改违规原因" :visible.sync="updateDialogVisible" width="50%">
       <!-- 内容主体区域 -->
       <el-form :model="updateForm" :rules="addFormRules" ref="updateFormRef" label-width="70px">
-        <el-form-item label="标签名" prop="label">
-          <el-input v-model="updateForm.reason"></el-input>
+        <el-form-item label="内容" prop="content">
+          <el-input v-model="updateForm.content"></el-input>
         </el-form-item>
-        <el-form-item label="编号" prop="code">
-          <el-input v-model="updateForm.code"></el-input>
-        </el-form-item>
-        <el-form-item label="权重" prop="weight">
-          <el-input v-model="updateForm.weight"></el-input>
+        <el-form-item label="分值" prop="score">
+          <el-input v-model="updateForm.score"></el-input>
         </el-form-item>
       </el-form>
 
@@ -123,130 +152,257 @@
         }, 1000)
       }
       return {
+        reasonId: "",
         //是否添加,修改
-        addDialogVisible:false,
+        addDialogVisible: false,
         updateDialogVisible: false,
-        //标签选项
-        options: [{
-          value: '选项1',
-          label: '全部标签'
-        }, {
-          value: '选项2',
-          label: '可用标签'
-        }, {
-          value: '选项3',
-          label: '失效标签'
-        }],
-        value: '',
         // 获取用户列表参数对象
         queryInfo: {
-          query: '',
           // 当前的页数
           pagenum: 1,
           // 当前每页显示多少数据
-          pagesize: 10
+          pagesize: 10,
+          managerCode: "",
+          score: "",
+          time: ""
         },
         total: 200,
         reasonForm: {
           reason: "",
           code: "",
           operator: "",
-          weight:"",
+          weight: "",
           opTime: ""
         },
-        reasonList:[],
+        reasonList: [],
         addForm: {
-          reason:"",
-          weight:""
+          content: "",
+          score: ""
         },
         addFormRules: {
-          reason: [
-            { required: true, message:'请输入违规名',trigger:'blur' },
-            {min:1, max:10, message: '标签名长度为1-10', trigger:'blur'}
+          content: [
+            { required: true, message: "请输入违规名", trigger: "blur" },
+            { min: 1, max: 10, message: "标签名长度为1-10", trigger: "blur" }
           ],
-          weight: [
-            { required: true, message:'请输入权重'},
-            { validator: checkWeight, trigger: 'blur'}
+          score: [
+            { required: true, message: "请输入分值" },
+            { validator: checkWeight, trigger: "blur" }
           ]
         },
         updateForm: {
-          reason:"",
-          code:"",
-          weight:""
+          id: "",
+          content: "",
+          score: ""
         },
-        templateSelection:-1,
-        templateRadio:-1
-
+        templateSelection: -1,
+        templateRadio: -1,
+        pickerOptions: {
+          shortcuts: [
+            {
+              text: "最近一周",
+              onClick(picker) {
+                const end = new Date()
+                const start = new Date()
+                start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+                picker.$emit("pick", [start, end])
+              }
+            },
+            {
+              text: "最近一个月",
+              onClick(picker) {
+                const end = new Date()
+                const start = new Date()
+                start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+                picker.$emit("pick", [start, end])
+              }
+            },
+            {
+              text: "最近三个月",
+              onClick(picker) {
+                const end = new Date()
+                const start = new Date()
+                start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+                picker.$emit("pick", [start, end])
+              }
+            }
+          ]
+        }
       }
     },
+    created() {
+      this.showReason()
+    },
     methods: {
+      //点击修改按钮
+      updateClick() {
+        this.updateForm.content = this.reasonList[this.templateSelection].content
+        this.updateForm.score = this.reasonList[this.templateSelection].score
+        this.updateForm.id = this.reasonList[this.templateSelection].id
+        this.updateDialogVisible = true
+        console.log(this.updateForm)
+      },
+      //展示标签
+      showReason() {
+        let param
+        param = {
+          pageNum: this.queryInfo.pagenum,
+          pageSize: this.queryInfo.pagesize,
+          managerCode: this.queryInfo.managerCode,
+          score: this.queryInfo.score
+        }
+        if (this.queryInfo.time != null) {
+          param.endTime = this.queryInfo.time[1]
+          param.startTime = this.queryInfo.time[0]
+        }
+        console.log(param)
+        this.$axios.get("http://localhost:8091/bbs_client/reason/listReason", {
+          params: param,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }).then(res => {
+          this.reasonList = res.data.data.list
+        })
+      },
       //更新标签
       updateReason() {
-        console.log(this.templateSelection)
-        this.addDialogClosed()
+        this.$refs.updateFormRef.validate(valid => {
+          console.log(valid)
+          if (!valid) {
+            return
+          }
+          this.$axios.put("http://localhost:8091/bbs_client/reason/update",
+            this.updateForm,
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }).then(res => {
+            console.log(res)
+            if (res.data.code == 0) {
+              this.$message({
+                type: "success",
+                message: res.data.data
+              })
+              this.showReason()
+            } else {
+              this.$message({
+                type: "info",
+                message: res.data.message
+              })
+            }
+          })
+        })
+        this.updateDialogVisible = false
       },
       //删除标签
       deleteReason() {
         console.log(this.templateSelection)
+        this.$axios.delete("http://localhost:8091/bbs_client/reason/delete/" + this.reasonList[this.templateSelection].id,
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }).then(res => {
+          console.log(res)
+          if (res.data.code == 0) {
+            this.$message({
+              type: "success",
+              message: res.data.data
+            })
+            this.showReason()
+          } else {
+            this.$message({
+              type: "info",
+              message: res.data.message
+            })
+          }
+        })
       },
       //将行id赋值
       getTemplateRow(index, row) {
         this.templateSelection = index
+        console.log("选择违规原因")
         console.log(row)
-        console.log(this.templateSelection > -1)
+        this.reasonId = row.id
       },
       //监听pagesize改变事件
       handleSizeChange(newSize) {
         console.log(newSize)
         this.queryInfo.pagesize = newSize
         this.$axios({
-          method: 'post',
-          url: 'http://localhost:8080/listUser',
+          method: "post",
+          url: "http://localhost:8080/listUser",
           data: {
-            pageNum:this.queryInfo.pagenum,
-            pageSize:newSize
+            pageNum: this.queryInfo.pagenum,
+            pageSize: newSize
           },
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json"
           }
         }).then(res => {
           console.log(res)
-          this.total = res.data.data.total;
+          this.total = res.data.data.total
           this.queryInfo.pagenum = res.data.data.pageNum
           this.userList = res.data.data.list
-        });
+        })
       },
       //监听页码值改变
       handleCurrentChange(newPage) {
         this.queryInfo.pagenum = newPage
         //重新发送请求
         this.$axios({
-          method: 'post',
-          url: 'http://localhost:8080/listUser',
+          method: "post",
+          url: "http://localhost:8080/listUser",
           data: {
-            pageNum:newPage,
-            pageSize:this.queryInfo.pagesize
+            pageNum: newPage,
+            pageSize: this.queryInfo.pagesize
           },
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json"
           }
         }).then(res => {
           console.log(res)
-          this.total = res.data.data.total;
+          this.total = res.data.data.total
           this.queryInfo.pagenum = res.data.data.pageNum
           this.userList = res.data.data.list
-        });
+        })
       },
       addDialogClosed() {
-        console.log('重置')
+        console.log("重置")
         this.$refs.addFormRef.resetFields()
       },
       //添加标签
       addReason() {
-        this.addDialogVisible = false
         this.$refs.addFormRef.validate(valid => {
-          if(!valid) return
-          //发起添加用户请求
+          if (!valid) return
+          console.log("新建")
+          console.log(this.addForm)
+          this.createReason()
+        })
+        this.addDialogVisible = false
+      },
+      //新建违规规则
+      createReason() {
+        this.$axios.post("http://localhost:8091/bbs_client/reason/create",
+          this.addForm,
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }).then(res => {
+          if (res.data.code == 0) {
+            this.$message({
+              type: "success",
+              message: res.data.data
+            })
+            this.showReason()
+          } else {
+            this.$message({
+              type: "info",
+              message: res.data.message
+            })
+          }
         })
       }
     }
@@ -256,5 +412,31 @@
 <style scoped>
   .el-select {
     margin-bottom: 30px;
+  }
+
+  .title {
+    float: left;
+    margin-left: 40px;
+    padding: 0px;
+  }
+
+  .el-input--small {
+    float: left;
+    width: 200px;
+    margin-right: 100px;
+    margin-left: 5px;
+  }
+
+  .line {
+    margin-top: 13px;
+    width: 100%;
+    margin-bottom: 12px;
+  }
+
+  .time {
+    float: left;
+    margin-left: 24px;
+    padding: 0px;
+    margin-right: 4px;
   }
 </style>

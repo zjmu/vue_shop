@@ -7,17 +7,17 @@
       <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
 
-    <!-- 编号-->
-    <!--        车主昵称-->
-    <!--        标签-->
-    <!--        状态-->
-    <!--        是否精选-->
-    <!--        是否顶置-->
-    <!--        操作人-->
-    <!--        操作日期-->
-    <!-- 卡片视图 -->
+    <!--编号-->
+    <!--车主昵称-->
+    <!--标签-->
+    <!--状态-->
+    <!--是否精选-->
+    <!--是否顶置-->
+    <!--操作人-->
+    <!--操作日期-->
+    <!--卡片视图 -->
     <div class="bigBox">
-      <!--      第一行-->
+      <!--第一行-->
       <div class="line">
         <div class="title">编号</div>
         <el-input
@@ -75,7 +75,7 @@
           ></el-option>
         </el-select>
       </div>
-      <!--      第三行-->
+      <!--第三行-->
       <div class="line">
         <div class="title">操作人</div>
         <el-input
@@ -104,26 +104,27 @@
       </div>
 
       <div class="button">
-        <el-button type="primary" size="small" icon="el-icon-circle-plus-outline">新建</el-button>
+        <el-button type="primary" size="small" icon="el-icon-circle-plus-outline" @click="addDialogVisible = true">新建
+        </el-button>
         <el-button type="primary" size="small" icon="el-icon-edit" :disabled="templateSelection>-1?false:true"
         >编辑
         </el-button>
         <el-button type="primary" size="small" icon="el-icon-time" :disabled="templateSelection>-1?false:true"
         >查看
         </el-button>
-<!--        删除-->
+        <!--        删除-->
         <el-button type="primary" size="small" icon="el-icon-delete" :disabled="templateSelection>-1?false:true"
         >删除
         </el-button>
-<!--        顶置-->
+        <!--        顶置-->
         <el-button type="primary" size="small" icon="el-icon-time" :disabled="templateSelection>-1?false:true"
         >顶置
         </el-button>
-<!--        取消顶置-->
+        <!--        取消顶置-->
         <el-button type="primary" size="small" icon="el-icon-time" :disabled="templateSelection>-1?false:true"
         >取消顶置
         </el-button>
-<!--        发布-->
+        <!--        发布-->
         <el-button type="primary" size="small" icon="el-icon-time" :disabled="templateSelection>-1?false:true"
         >发布
         </el-button>
@@ -149,7 +150,6 @@
       </el-table>
     </div>
 
-
     <!-- 分页 -->
     <el-pagination
       @size-change="handleSizeChange"
@@ -163,27 +163,39 @@
     <!--    </el-card>-->
 
     <!-- 添加用户对话框 -->
-    <el-dialog title="添加用户" :visible.sync="addDialogVisible" width="50%" @close="addDialogClosed">
+    <el-dialog title="创建系统文章" :visible.sync="addDialogVisible" width="50%" @close="addDialogClosed">
       <!-- 内容主体区域 -->
       <el-form :model="addForm" :rules="addFormRules" ref="updateFormRef" label-width="70px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="addForm.username"></el-input>
+        <el-form-item label="标题" prop="title">
+          <el-input v-model="addForm.title"></el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="addForm.password"></el-input>
+        <el-form-item label="正文" prop="content">
+          <el-input v-model="addForm.content"></el-input>
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="addForm.email"></el-input>
-        </el-form-item>
-        <el-form-item label="手机号" prop="mobile">
-          <el-input v-model="addForm.mobile"></el-input>
-        </el-form-item>
+        <el-upload
+          class="avatar-uploader"
+          action="http://localhost:8091/bbs_client/article/uploadImage"
+          :show-file-list="false"
+          :on-success="handleAvatarSuccess"
+          :before-upload="beforeAvatarUpload">
+          <img v-if="imgUrl" :src="imgUrl" class="avatar">
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+        </el-upload>
+        <div id="editor">
+          <mavon-editor
+            style="height: 100%"
+            @save="saveDoc"
+            @imgAdd="handleEditorImgAdd"
+            @imgDel="handleEditorImgDel"
+            ref=md
+          ></mavon-editor>
+        </div>
       </el-form>
 
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
         <el-button @click="addDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addUser">确 定</el-button>
+        <el-button type="primary" @click="addArticle">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -212,7 +224,14 @@
 </template>
 
 <script>
+  import { mavonEditor } from "mavon-editor"
+  import "mavon-editor/dist/css/index.css"
+
   export default {
+    name: "editor",
+    components: {
+      mavonEditor
+    },
     data() {
       //验证邮箱规则
       var checkEmail = (rule, value, cb) => {
@@ -240,6 +259,12 @@
       }
 
       return {
+        doc: "",
+        //本地地址
+        imageUrl: "",
+        //云端图片地址
+        imgUrl: "",
+
         pickerOptions: {
           shortcuts: [
             {
@@ -288,10 +313,9 @@
         updateDialogVisible: false,
         //添加用户表单
         addForm: {
-          username: "",
-          password: "",
-          email: "",
-          mobile: ""
+          title: "",
+          content: "",
+          markdown: ""
         },
         updateForm: {
           username: "",
@@ -353,9 +377,62 @@
       })
     },
     methods: {
-      getWhaitList() {
-        console.log(this.queryInfo)
+      handleEditorImgAdd(filename, $imgfile) {
+        console.log(filename)
+        console.log($imgfile)
+        var formdata = new FormData()
+        formdata.append("file", $imgfile)
+        this.$axios.post("http://localhost:8091/bbs_client/article/uploadImage",
+          formdata,
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+        }).then(res => {
+           console.log(res)
+          this.$refs.md.$img2Url(filename,res.data.data)
+        })
       },
+      handleEditorImgDel(filename) {
+        console.log(filename)
+        var formdata = new FormData()
+        formdata.append("")
+      },
+      addArticle() {
+        console.log("发起添加请求")
+        this.$axios.post("http://localhost:8091/bbs_client/systemArticle/create",
+          this.addForm,
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }).then(res => {
+          console.log(res)
+        })
+        // })
+      },
+      //保存回调
+      saveDoc(markdown, html) {
+        // 此时会自动将 markdown 和 html 传递到这个方法中
+        console.log("markdown内容:" + markdown)
+        this.addForm.markdown = markdown
+        console.log(this.addForm.markdown)
+        this.addForm.markdown = this.addForm.markdown.replace(/↵/g,'\n')
+        console.log(this.addForm)
+      },
+      //上传图片
+      handleAvatarSuccess(res, file) {
+        this.imgUrl = URL.createObjectURL(file.raw)
+        this.addForm.imageUrl = res.data
+      },
+      beforeAvatarUpload(file) {
+        const isLt2M = file.size / 1024 / 1024 < 4
+        if (!isLt2M) {
+          this.$message.error("上传头像图片大小不能超过 4MB!")
+        }
+        return isLt2M
+      },
+
       getTemplateRow(index, row) {
         this.templateSelection = index
         console.log(this.templateSelection)
@@ -470,6 +547,36 @@
   }
 
   .button {
-    margin-left: 30px;
+    margin: 30px 30px;
+    width: 100%;
+    float: left;
+  }
+
+  //上传图片样式
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
   }
 </style>

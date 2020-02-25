@@ -10,9 +10,12 @@ import Reason from '../components/reason/reason'
 import Article from '../components/article/article'
 import ReviewArticle from '../components/reviewArticle/reviewArticle'
 import ReviewComment from '../components/reviewComment/reviewComment'
+import Room from '../components/room/Room'
+
 
 
 Vue.use(VueRouter)
+
 
 const routes = [
   { path: '/login', component: Login },
@@ -28,7 +31,8 @@ const routes = [
                {path: '/reason', component:Reason},
                {path: '/article', component:Article},
                {path: '/reviewArticle', component:ReviewArticle},
-               {path: '/reviewComment', component:ReviewComment}
+               {path: '/reviewComment', component:ReviewComment},
+               {path: '/room', component:Room}
                ]
   }
 ]

@@ -122,7 +122,7 @@
           ></el-radio>
         </div>
         <div class="line" v-if="showReasonType==-1">
-<!--          默认选择-->
+          <!--          默认选择-->
           <div class="title">禁止原因</div>
           <el-select size="small" v-model="disableResaon" value-key="id" clearable placeholder="请选择">
             <el-option
@@ -133,7 +133,7 @@
             ></el-option>
           </el-select>
         </div>
-<!--        自定义部分-->
+        <!--        自定义部分-->
         <div class="line" v-if="showReasonType==1">
           <div class="title">禁止原因</div>
           <el-input size="small" placeholder="请输入内容" v-model="myDisableResaon.content" clearable />
@@ -173,12 +173,12 @@
           <el-input v-model="showArticleForm.shareNum" :disabled="true" autosize></el-input>
         </el-form-item>
         <el-form-item label="附属内容" prop="articleExtVOS">
-            <i v-for="(item,index) in imageItems" :key="index">
-              <el-image
-                class="table-td-thumb"
-                :src="item.value"
-              ></el-image>
-            </i>
+          <i v-for="(item,index) in imageItems" :key="index">
+            <el-image
+              class="table-td-thumb"
+              :src="item.value"
+            ></el-image>
+          </i>
         </el-form-item>
       </el-form>
 
@@ -341,16 +341,16 @@
           content:"不良言论",
           score:5
         },
-        {
-          id:2,
-          content:"低俗词汇",
-          score:3
-        },
-        {
-          id:3,
-          content:"恶意攻击",
-          score:3
-        }]
+          {
+            id:2,
+            content:"低俗词汇",
+            score:3
+          },
+          {
+            id:3,
+            content:"恶意攻击",
+            score:3
+          }]
       }
     },
     created() {

@@ -74,7 +74,7 @@
       <!-- 用户列表区域 -->
       <el-table :data="userList" border stripe height="380">
         <el-table-column type="index"></el-table-column>
-        <el-table-column label="id" prop="id" v-if="false"></el-table-column>
+        <el-table-column label="id" prop="id"></el-table-column>
         <el-table-column label="姓名" prop="name"></el-table-column>
         <el-table-column label="签名" prop="signature"></el-table-column>
         <el-table-column label="邮箱" prop="email"></el-table-column>
@@ -114,7 +114,6 @@
     <!-- 添加用户对话框 -->
     <el-dialog title="添加用户" :visible.sync="addDialogVisible"
                width="50%" @close="addDialogClosed">
-
       <!-- 内容主体区域 -->
       <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px">
         <el-form-item label="用户名" prop="username">
@@ -473,7 +472,6 @@
           if (!valid) {
             return
           }
-          console.log(this.addForm)
           //发起添加用户请求
           this.$axios.post("http://localhost:8091/bbs_client/user/create",
             this.addForm,
@@ -529,7 +527,7 @@
             })
           })
       },
-      //添加用户表单关闭
+      //禁止表单关闭
       addDialogClosed() {
         console.log("重置")
         this.$refs.addFormRef.resetFields()

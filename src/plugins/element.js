@@ -18,18 +18,21 @@ import {
   Switch,
   Tooltip,
   Pagination,
+  Upload,
   Dialog,
   MessageBox,
   TimePicker,
   DatePicker,
   Select,
   Option,
-  Radio
+  Radio,
+  Image
 } from "element-ui"
 import router from "../router"
 import Operation from "less/lib/less/tree/operation"
 
 Vue.use(Button)
+Vue.use(Image)
 Vue.use(Form)
 Vue.use(FormItem)
 Vue.use(Input)
@@ -37,6 +40,7 @@ Vue.use(Container)
 Vue.use(Header)
 Vue.use(Radio)
 Vue.use(Aside)
+Vue.use(Upload)
 Vue.use(Main)
 Vue.prototype.$message = Message
 Vue.use(Menu)
